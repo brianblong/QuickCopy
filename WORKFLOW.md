@@ -38,3 +38,15 @@ On another Windows installation, run `py -m unittest discover -s tests -v` and b
 ## GitHub result
 
 The private repository `https://github.com/brianblong/QuickCopy` was created under the authenticated `brianblong` account. Repository-local commits use the user-approved verified no-reply identity `Brian Long <161542780+brianblong@users.noreply.github.com>`. Base `main` and feature branch `feat/quickcopy-desktop` were pushed with commits `37d7e22`, `f3ae47f`, and `0500937`; generated files, environments, build output, and personal snippets remain ignored. Draft PR `https://github.com/brianblong/QuickCopy/pull/1` titled `Add QuickCopy Windows snippet app` is open against `main`. Merging remains with the owner. Taskbar pinning and visual/display checks remain manual acceptance checks.
+
+## Dark desktop redesign
+
+The owner requested a narrower window directly above the taskbar, a modern charcoal/gray interface inspired by Herdr, a refined dark copy mark, and a complete private GitHub presentation with screenshots and downloads.
+
+The lead implemented a 400 × 370 window (minimum 360 × 300), dark cards/input/buttons/scrollbar, a supported Windows dark title bar, and whole-window positioning within the pointer monitor's work area. New source artwork and antialiased PNG/multi-resolution ICO assets keep the app and copy buttons visually consistent. The app still uses only the Python standard library.
+
+The lead inspected the actual Windows preview with the computer-use skill, entered fictional sample text, clicked Add and Copy, and captured three actual app screenshots in `docs/images`. No personal snippet data was used. README now includes screenshots, usage, storage/backup, launch/pin/update/build instructions, and a planned private preview download. CONTRIBUTING, CHANGELOG, issue and PR templates support the repository workflow.
+
+Lead validation: nine Windows tests passed, including decorated-window taskbar clearance and prior clipboard/persistence regressions; `git diff --check` passed; the standalone executable rebuilt with all new assets. Existing reviewer `t1b` received requirements, changes, screenshots, and results using `send --wait` for independent review. After findings are resolved, existing GitHub agent `t1h` will update draft PR #1 and publish the private `v0.2.0-preview.1` prerelease and checksum. The repo must stay private, both sessions stay open, and merging stays with the owner.
+
+Independent redesign review completed in `t1b`: no new blocking findings. The reviewer passed all nine tests, Python compilation and PowerShell parsing, and exercised the rebuilt executable with isolated LOCALAPPDATA. The decorated frame opened exactly 12 pixels inside the monitor's right/bottom work-area edges; local JSON creation, duplicate launch and minimized restoration passed. Taskbar pin/reopen, alternate physical monitor/scaling arrangements, and packaged UI copy-after-exit remain unperformed; the source-level process-exit clipboard test passed. See the redesign section in `REVIEW.md`.

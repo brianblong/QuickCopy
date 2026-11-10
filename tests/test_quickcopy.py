@@ -7,7 +7,7 @@ import tkinter as tk
 import unittest
 from unittest.mock import patch
 
-from quickcopy import EXAMPLES, QuickCopy, load_snippets, save_snippets
+from quickcopy import EXAMPLES, QuickCopy, load_snippets, save_snippets, position_window
 
 
 class QuickCopyTests(unittest.TestCase):
@@ -59,13 +59,37 @@ class QuickCopyTests(unittest.TestCase):
         self.assertEqual(len(load_snippets(self.path)), 38)
 
     def test_input_and_add_visible_at_default_and_minimum_size(self):
-        for size in ["460x310", "360x240"]:
+        for size in ["400x370", "360x300"]:
             self.root.geometry(size)
             self.root.update()
             for widget in self.app.entry.master.winfo_children():
                 self.assertTrue(widget.winfo_ismapped())
                 self.assertLessEqual(widget.winfo_rooty() + widget.winfo_height(),
                                      self.root.winfo_rooty() + self.root.winfo_height())
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows monitor work area")
+    def test_startup_window_clears_taskbar(self):
+        import ctypes
+        from ctypes import wintypes
+        class MonitorInfo(ctypes.Structure):
+            _fields_ = [("size", wintypes.DWORD), ("monitor", wintypes.RECT),
+                        ("work", wintypes.RECT), ("flags", wintypes.DWORD)]
+        user = ctypes.WinDLL("user32")
+        user.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
+        user.GetAncestor.restype = wintypes.HWND
+        user.MonitorFromWindow.argtypes = [wintypes.HWND, wintypes.DWORD]
+        user.MonitorFromWindow.restype = wintypes.HANDLE
+        user.GetMonitorInfoW.argtypes = [wintypes.HANDLE, ctypes.POINTER(MonitorInfo)]
+        user.GetWindowRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
+        position_window(self.root)
+        self.root.update()
+        window = user.GetAncestor(self.root.winfo_id(), 2)
+        rect = wintypes.RECT()
+        info = MonitorInfo(size=ctypes.sizeof(MonitorInfo))
+        self.assertTrue(user.GetWindowRect(window, ctypes.byref(rect)))
+        self.assertTrue(user.GetMonitorInfoW(user.MonitorFromWindow(window, 2), ctypes.byref(info)))
+        self.assertEqual(rect.right, info.work.right - 12)
+        self.assertEqual(rect.bottom, info.work.bottom - 12)
 
     @unittest.skipUnless(sys.platform == "win32", "Windows clipboard ownership")
     def test_clipboard_survives_copying_process_exit(self):

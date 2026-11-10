@@ -51,3 +51,42 @@
 ## Handoff status
 
 The original clipboard blocker is resolved and affected tests plus executable launch/focus checks pass. Keep taskbar pinning and visual checks marked unperformed in the handoff.
+
+## Redesign review — 2026-11-09
+
+### Result
+
+**No new release-blocking findings.** The redesign behavior reviewed here is consistent with the requested compact charcoal UI, bottom-right placement, retained clipboard/storage behavior, and single-instance focus behavior.
+
+### Executed checks
+
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: **passed, 9 tests**.
+  - This covers exact long Unicode/multiline copy, clipboard survival after process exit, Add/restart persistence, scrolling, default/minimum input visibility at `400x370` and `360x300`, failed saves, malformed storage, and startup placement against the current monitor work area.
+- `.venv\Scripts\python.exe -m py_compile quickcopy.py tests\test_quickcopy.py`: **passed**.
+- PowerShell parser check for `build.ps1`: **passed**.
+- Rebuilt `dist\QuickCopy.exe` was present with size `10,650,166` bytes and timestamp `2026-11-09 19:59:37`.
+- Executable smoke test with a temporary `LOCALAPPDATA`: **passed**.
+  - The executable created isolated `QuickCopy\snippets.json`.
+  - The actual decorated frame was `416x409` and its right/bottom edges were exactly 12 pixels above/right of the current monitor work area.
+  - Minimizing the first instance, then launching the executable again, left one visible, restored, non-minimized window.
+  - Test processes and temporary data were cleaned up by their specific process IDs/path.
+
+### Static observations
+
+- **Placement and ctypes:** `quickcopy.py:16-47` uses `MonitorFromPoint(..., MONITOR_DEFAULTTONEAREST)`, `GetMonitorInfoW`, the whole decorated frame from `GetWindowRect`, and `SetWindowPos` with `SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE`. The `max(work.left, right - width - 12)` and corresponding Y calculation correctly keep the window inside work areas with negative monitor coordinates; a physical multi-monitor arrangement was not available for execution.
+- **Startup sequencing:** `quickcopy.py:264` schedules placement with `after_idle`, after Tk has created and measured the native frame. The executable smoke test confirmed the resulting decorated-frame placement.
+- **Clipboard ownership:** `quickcopy.py:111-133` retains the previously reviewed native `CF_UNICODETEXT` ownership path. The nine-test run reconfirmed the separate-process clipboard regression.
+- **Layout and interaction:** `quickcopy.py:161-264` keeps the list as the expanding grid row and reserves the new-snippet label, field/Add row, and helper text. The focused scrollbar and buttons remain adjacent to previews; the test suite confirms scrolling, focus reveal, and input visibility.
+- **Assets/package:** `assets/copy-light.png`, `assets/quickcopy.png`, `assets/quickcopy.ico`, and `assets/quickcopy.svg` are present. `build.ps1:9` adds the complete `assets` directory to the one-file package, while the ICO remains the executable icon.
+- **Documentation/privacy:** `README.md` identifies Windows 10/11, local `%LOCALAPPDATA%` storage, fictional screenshot data, private preview access, build instructions, and the planned `v0.2.0-preview.1` links. The release URL and private-repository permissions were not independently verified through GitHub in this review.
+
+### Unperformed manual checks
+
+- Taskbar pinning and reopening from the pinned icon.
+- Physical multi-monitor arrangements, negative-coordinate monitor placement, and alternate display scaling.
+- Visual comfort/icon appearance outside the supplied screenshots.
+- Packaged-executable copy through the UI followed by clipboard read after executable exit; the source-level separate-process regression passed.
+
+### Handoff status
+
+The redesign is clear of new functional findings based on the executed checks. Keep the repository private and the PR draft as requested; taskbar, multi-monitor/scaling, and release-link verification remain manual or GitHub-agent checks.

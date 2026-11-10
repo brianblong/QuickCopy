@@ -17,6 +17,44 @@ EXAMPLES = [
     "Certification ID: EXAMPLE-12345",
 ]
 APP_ID = "QuickCopy.Desktop.1"
+ASSETS = Path(__file__).resolve().parent / "assets"
+BG, SURFACE, BORDER = "#141618", "#1e2125", "#30343b"
+TEXT, MUTED = "#e7e9ed", "#9ca3ae"
+
+
+def position_window(root):
+    """Place the whole decorated window inside the pointer monitor's work area."""
+    if sys.platform != "win32":
+        return
+    user = ctypes.WinDLL("user32", use_last_error=True)
+
+    class MonitorInfo(ctypes.Structure):
+        _fields_ = [("size", wintypes.DWORD), ("monitor", wintypes.RECT),
+                    ("work", wintypes.RECT), ("flags", wintypes.DWORD)]
+
+    user.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
+    user.GetAncestor.restype = wintypes.HWND
+    user.MonitorFromPoint.argtypes = [wintypes.POINT, wintypes.DWORD]
+    user.MonitorFromPoint.restype = wintypes.HANDLE
+    user.GetMonitorInfoW.argtypes = [wintypes.HANDLE, ctypes.POINTER(MonitorInfo)]
+    user.GetWindowRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
+    user.SetWindowPos.argtypes = [wintypes.HWND, wintypes.HWND, ctypes.c_int,
+                                  ctypes.c_int, ctypes.c_int, ctypes.c_int, wintypes.UINT]
+    pointer, rect = wintypes.POINT(), wintypes.RECT()
+    user.GetCursorPos(ctypes.byref(pointer))
+    info = MonitorInfo(size=ctypes.sizeof(MonitorInfo))
+    window = user.GetAncestor(root.winfo_id(), 2)  # GA_ROOT, includes native title bar.
+    if user.GetMonitorInfoW(user.MonitorFromPoint(pointer, 2), ctypes.byref(info)) and user.GetWindowRect(window, ctypes.byref(rect)):
+        x = max(info.work.left, info.work.right - (rect.right - rect.left) - 12)
+        y = max(info.work.top, info.work.bottom - (rect.bottom - rect.top) - 12)
+        user.SetWindowPos(window, None, x, y, 0, 0, 0x0015)  # no resize, reorder, or focus change
+    # Windows 10/11 title-bar colors. Older Windows may ignore these attributes.
+    dwm = ctypes.WinDLL("dwmapi")
+    dwm.DwmSetWindowAttribute.argtypes = [wintypes.HWND, wintypes.DWORD,
+                                        ctypes.c_void_p, wintypes.DWORD]
+    for attribute, value in [(20, 1), (35, 0x00181614), (36, 0x00ede9e7)]:
+        setting = ctypes.c_int(value)
+        dwm.DwmSetWindowAttribute(window, attribute, ctypes.byref(setting), ctypes.sizeof(setting))
 
 
 def data_path():
@@ -73,15 +111,7 @@ def claim_instance():
 
 
 def copy_icon(master):
-    """The same two outline rectangles used by assets/quickcopy.ico."""
-    icon = tk.PhotoImage(master=master, width=24, height=24)
-    for left, top, right, bottom in [(9, 3, 21, 16), (3, 8, 15, 21)]:
-        for x, y, width, height in [
-            (left, top, right - left, 2), (left, bottom - 2, right - left, 2),
-            (left, top, 2, bottom - top), (right - 2, top, 2, bottom - top),
-        ]:
-            icon.put("#245c9c", to=(x, y, x + width, y + height))
-    return icon
+    return tk.PhotoImage(master=master, file=str(ASSETS / "copy-light.png"))
 
 
 def write_clipboard(root, text):
@@ -150,22 +180,55 @@ class QuickCopy:
         if not self.path.exists():
             save_snippets(self.path, self.items)
         root.title("QuickCopy")
-        root.geometry("460x310")
-        root.minsize(360, 240)
+        root.geometry("400x370")
+        root.minsize(360, 300)
+        root.configure(background=BG)
+        root.option_add("*Font", ("Segoe UI", 10))
+        style = ttk.Style(root)
+        style.theme_use("clam")
+        style.configure("TFrame", background=BG)
+        style.configure("TLabel", background=BG, foreground=TEXT)
+        style.configure("Muted.TLabel", foreground=MUTED, font=("Segoe UI", 9))
+        style.configure("Card.TFrame", background=SURFACE)
+        style.configure("Card.TLabel", background=SURFACE, foreground=TEXT)
+        style.configure("TButton", background="#2a2e34", foreground=TEXT,
+                        bordercolor=BORDER, lightcolor=BORDER, darkcolor=BORDER,
+                        padding=(8, 7), relief="flat", font=("Segoe UI", 9))
+        style.map("TButton", background=[("active", "#383e47"), ("pressed", "#414854")],
+                  bordercolor=[("focus", "#8993a3")])
+        style.configure("Add.TButton", background="#c6cbd2", foreground="#202329",
+                        bordercolor="#c6cbd2", padding=(16, 8))
+        style.map("Add.TButton", background=[("active", "#e1e4e9"), ("pressed", "#aab2be")])
+        style.configure("Vertical.TScrollbar", background="#3b414a", troughcolor=BG,
+                        bordercolor=BG, lightcolor=BG, darkcolor=BG, borderwidth=0, width=7)
+        style.layout("Vertical.TScrollbar", [("Vertical.Scrollbar.trough", {
+            "sticky": "ns", "children": [("Vertical.Scrollbar.thumb", {"sticky": "nsew"})]})])
         self.icon = copy_icon(root)
-        root.iconphoto(True, self.icon)
-        icon_path = Path(__file__).resolve().parent / "assets" / "quickcopy.ico"
+        self.logo = tk.PhotoImage(master=root, file=str(ASSETS / "quickcopy.png")).subsample(8)
+        root.iconphoto(True, self.logo)
+        icon_path = ASSETS / "quickcopy.ico"
         if sys.platform == "win32" and icon_path.exists():
             root.iconbitmap(str(icon_path))
 
-        outer = ttk.Frame(root, padding=10)
+        outer = ttk.Frame(root, padding=(16, 12, 16, 14))
         outer.pack(fill="both", expand=True)
         outer.columnconfigure(0, weight=1)
-        outer.rowconfigure(1, weight=1)
-        ttk.Label(outer, text="Saved snippets", font=("Segoe UI", 11, "bold")).grid(row=0, column=0, sticky="w")
+        outer.rowconfigure(2, weight=1)
+        header = ttk.Frame(outer)
+        header.grid(row=0, column=0, sticky="ew", pady=(0, 14))
+        ttk.Label(header, image=self.logo).pack(side="left", padx=(0, 10))
+        heading = ttk.Frame(header)
+        heading.pack(side="left")
+        ttk.Label(heading, text="QuickCopy", font=("Segoe UI Semibold", 15)).pack(anchor="w")
+        ttk.Label(heading, text="Your words, one click away.", style="Muted.TLabel").pack(anchor="w")
+        section = ttk.Frame(outer)
+        section.grid(row=1, column=0, sticky="ew")
+        ttk.Label(section, text="SAVED SNIPPETS", style="Muted.TLabel").pack(side="left")
+        self.count = ttk.Label(section, text=str(len(self.items)), style="Muted.TLabel")
+        self.count.pack(side="right", padx=(10, 12))
         area = ttk.Frame(outer)
-        area.grid(row=1, column=0, sticky="nsew", pady=(6, 8))
-        self.canvas = tk.Canvas(area, highlightthickness=0, takefocus=True)
+        area.grid(row=2, column=0, sticky="nsew", pady=(8, 14))
+        self.canvas = tk.Canvas(area, background=BG, highlightthickness=0, takefocus=True)
         scrollbar = ttk.Scrollbar(area, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
@@ -179,13 +242,19 @@ class QuickCopy:
         self.canvas.bind("<Prior>", lambda event: self.canvas.yview_scroll(-1, "pages"))
 
         entry_area = ttk.Frame(outer)
-        entry_area.grid(row=2, column=0, sticky="ew")
-        self.entry = tk.Text(entry_area, height=2, width=25, wrap="word", font=("Segoe UI", 10), undo=True)
+        ttk.Label(outer, text="NEW SNIPPET", style="Muted.TLabel").grid(row=3, column=0, sticky="w", pady=(0, 7))
+        entry_area.grid(row=4, column=0, sticky="ew")
+        self.entry = tk.Text(entry_area, height=2, width=25, wrap="word", font=("Segoe UI", 10), undo=True,
+                             background=SURFACE, foreground=TEXT, insertbackground=TEXT,
+                             selectbackground="#465165", selectforeground="#ffffff", relief="flat",
+                             highlightthickness=1, highlightbackground=BORDER,
+                             highlightcolor="#8993a3", padx=9, pady=7)
         self.entry.pack(side="left", fill="x", expand=True)
-        ttk.Button(entry_area, text="Add", command=self.add).pack(side="right", padx=(8, 0))
-        ttk.Label(outer, text="Paste text above. Add saves it on this PC.").grid(row=3, column=0, sticky="w", pady=(5, 0))
+        ttk.Button(entry_area, text="Add", style="Add.TButton", command=self.add).pack(side="right", padx=(8, 0))
+        ttk.Label(outer, text="Saved on this device", style="Muted.TLabel").grid(row=5, column=0, sticky="w", pady=(10, 0))
         for item in self.items:
             self.add_row(item)
+        root.after_idle(lambda: position_window(root))
 
     def update_scroll(self, event=None):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
@@ -193,7 +262,7 @@ class QuickCopy:
     def resize_rows(self, event):
         self.canvas.itemconfigure(self.row_window, width=event.width)
         for row in self.rows.winfo_children():
-            row.winfo_children()[0].configure(wraplength=max(100, event.width - 100))
+            row.winfo_children()[0].configure(wraplength=max(100, event.width - 115))
 
     def mousewheel(self, event):
         widget = self.root.winfo_containing(event.x_root, event.y_root)
@@ -204,12 +273,12 @@ class QuickCopy:
             widget = widget.master
 
     def add_row(self, text):
-        row = ttk.Frame(self.rows, padding=(0, 5))
-        row.pack(fill="x")
+        row = ttk.Frame(self.rows, style="Card.TFrame", padding=(12, 10))
+        row.pack(fill="x", pady=(0, 7), padx=(0, 5))
         preview = text.replace("\r", " ").replace("\n", " ")
         if len(preview) > 160:
             preview = preview[:157] + "..."
-        ttk.Label(row, text=preview, wraplength=max(100, self.canvas.winfo_width() - 100)).pack(
+        ttk.Label(row, text=preview, style="Card.TLabel", wraplength=max(100, self.canvas.winfo_width() - 115)).pack(
             side="left", fill="x", expand=True)
         button = ttk.Button(row, image=self.icon, text="Copy", compound="left", width=8)
         button.configure(command=lambda: self.copy(text, button))
@@ -244,6 +313,7 @@ class QuickCopy:
             messagebox.showerror("Could not save", str(error), parent=self.root)
             return
         self.items.append(text)
+        self.count.configure(text=str(len(self.items)))
         self.add_row(text)
         self.entry.delete("1.0", "end")
         self.root.update_idletasks()
