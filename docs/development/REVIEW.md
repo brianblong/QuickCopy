@@ -161,7 +161,7 @@ The apparent minimized-restore failure is cleared as reviewer test contamination
 
 ### Executed checks
 
-- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: **20 tests passed, 1 intentional skip** in 12.251 seconds.
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: **20 tests ran: 19 passed and 1 intentional skip** in 12.251 seconds.
   - Passed coverage includes real press/motion/release reorder and restart persistence, click/cancel/outside-drop no-save behavior, held-edge autoscroll, duplicate reorder with pending edit and row actions, failed-save preservation, keyboard boundaries, edit/delete interactions, and clipboard/storage regressions.
   - `test_second_launch_restores_own_window_with_same_title_preview` was skipped because a real QuickCopy instance was already running. It was not closed, focused, or killed.
 - `.venv\Scripts\python.exe -m py_compile quickcopy.py tests\test_quickcopy.py`: **passed**.

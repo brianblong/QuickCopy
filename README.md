@@ -3,7 +3,7 @@
   <h1>QuickCopy</h1>
   <p>A small Windows dock for the text you reuse.</p>
   <p><strong>Windows 10 / 11</strong> · <strong>Local storage</strong> · <strong>Private preview</strong></p>
-  <p><a href="https://github.com/brianblong/QuickCopy/releases/tag/v0.3.0-preview.1">Download the v0.3 preview</a> · <a href="#use-it">Use it</a> · <a href="#build-from-source">Build from source</a></p>
+  <p><a href="https://github.com/brianblong/QuickCopy/releases/tag/v0.4.0-preview.1">Download the v0.4 preview</a> · <a href="#use-it">Use it</a> · <a href="#build-from-source">Build from source</a></p>
   <img src="docs/images/floating-dock.png" width="300" alt="QuickCopy floating dock with saved fictional snippets">
 </div>
 
@@ -11,11 +11,11 @@ QuickCopy keeps a short list of links, IDs, and other text close at hand. It ope
 
 ## Download
 
-**[Download QuickCopy.exe — Windows x64 preview](https://github.com/brianblong/QuickCopy/releases/download/v0.3.0-preview.1/QuickCopy.exe)**
+**[Download QuickCopy.exe — Windows x64 preview](https://github.com/brianblong/QuickCopy/releases/download/v0.4.0-preview.1/QuickCopy.exe)**
 
 The repository and preview are private. Sign in with an account that has access. The executable is unsigned and does not require Python.
 
-1. Download `QuickCopy.exe` from the [v0.3.0-preview.1 release](https://github.com/brianblong/QuickCopy/releases/tag/v0.3.0-preview.1).
+1. Download `QuickCopy.exe` from the [v0.4.0-preview.1 release](https://github.com/brianblong/QuickCopy/releases/tag/v0.4.0-preview.1).
 2. Put it in a permanent folder and open it.
 3. Right-click the running taskbar icon and choose **Pin to taskbar**.
 4. Close it and click the pinned icon to open it again.
@@ -33,6 +33,8 @@ The dock shows your saved snippets as compact rows. Click a row's copy button to
 | Add a snippet | Edit a snippet |
 | --- | --- |
 | <img src="docs/images/add-snippet.png" width="300" alt="QuickCopy add panel with fictional text"> | <img src="docs/images/edit-snippet.png" width="300" alt="QuickCopy edit panel with fictional text"> |
+
+<img src="docs/images/reorder-snippets.png" width="420" alt="QuickCopy showing a fictional snippet being reordered">
 
 - Click **+** to open the Add panel. **Ctrl+Enter** saves; **Escape** cancels.
 - Double-click a snippet to edit it. You can also right-click it and choose **Edit**.
@@ -62,7 +64,6 @@ Python 3.12+ with Tcl/Tk on Windows is supported. The app itself uses only the s
 ```powershell
 git clone https://github.com/brianblong/QuickCopy.git
 cd QuickCopy
-git switch feat/quickcopy-desktop  # Until the initial draft PR is merged
 py quickcopy.py
 ```
 
@@ -80,7 +81,7 @@ Run the Windows tests:
 py -m unittest discover -s tests -v
 ```
 
-The 20-test suite uses temporary storage and fictional text. It covers copy and clipboard survival, add/edit/delete and order persistence, drag cancellation and scrolling, duplicate rows, empty lists, keyboard interaction, errors, startup placement, and same-title single-instance collisions.
+The 20-test suite uses temporary storage and fictional text. Locally, 20 tests run with 19 passing and one intentional single-instance skip when a live user QuickCopy process is present; Windows CI runs all 20 without that local-process limitation. The suite covers copy and clipboard survival, add/edit/delete and order persistence, drag cancellation and scrolling, duplicate rows, empty lists, keyboard interaction, errors, startup placement, and same-title single-instance collisions.
 
 ## Repository
 
