@@ -26,6 +26,8 @@ The release includes `SHA256SUMS.txt`. Compare it with:
 Get-FileHash .\QuickCopy.exe -Algorithm SHA256
 ```
 
+To check the embedded build version in Windows, right-click `QuickCopy.exe`, choose **Properties**, open **Details**, and confirm **Product version** and **File version** are `0.4.1-preview.1`.
+
 ## Use it
 
 The dock shows your saved snippets as compact rows. Click a row's copy button to copy the complete original text, including line breaks, Unicode, and surrounding whitespace. The button briefly shows a checkmark, and a small `Copied.` label appears below it.
@@ -35,6 +37,10 @@ The dock shows your saved snippets as compact rows. Click a row's copy button to
 | <img src="docs/images/add-snippet.png" width="300" alt="QuickCopy add panel with fictional text"> | <img src="docs/images/edit-snippet.png" width="300" alt="QuickCopy edit panel with fictional text"> |
 
 <img src="docs/images/reorder-snippets.png" width="420" alt="QuickCopy showing a fictional snippet being reordered">
+
+| Hover | Selected |
+| --- | --- |
+| <img src="docs/images/hover-snippet.png" width="220" alt="QuickCopy snippet row with gray hover highlight"> | <img src="docs/images/selected-snippet.png" width="220" alt="QuickCopy snippet row with gray selected highlight"> |
 
 - Click **+** to open the Add panel. **Ctrl+Enter** saves; **Escape** cancels.
 - Double-click a snippet to edit it. You can also right-click it and choose **Edit**.
