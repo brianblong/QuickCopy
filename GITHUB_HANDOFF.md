@@ -9,12 +9,14 @@ The final independent review is complete. The original clipboard-after-exit bug 
 - Intended branch: `feat/quickcopy-desktop`
 - Suggested app commit message: `feat: add local QuickCopy desktop snippet app`
 - Suggested base commit message: `chore: initialize QuickCopy repository ignores`
-- Base: a new local repository should have a `main` base before the feature branch.
-- Current blocker: this folder is still not a Git repository, no Git author name/email is configured, and no existing QuickCopy destination repository was found.
+- Base: `main` initialized locally before the feature branch.
+- Git identity: repository-local `Brian Long <brianblong06@gmail.com>` as explicitly authorized.
 - GitHub access: authenticated as `brianblong` via `gh`, with `repo` scope.
-- Remote: none configured. No remote repository was created and no credentials were changed.
-- Commit SHAs: none created because of the missing Git identity.
-- Existing repository search: no repository matching `QuickCopy`, `quick-copy`, or `quickcopy` was found under `brianblong`; unrelated repositories were not selected.
+- Private repository: `https://github.com/brianblong/QuickCopy` was created and verified private.
+- Local commits: `acd31af` (`chore: initialize QuickCopy repository ignores`), `77fe48c` (`feat: add local QuickCopy desktop snippet app`).
+- Push blocker: GitHub rejected `main` because the commit would publish the private Gmail address (`GH007`). No account email-privacy setting was changed and no replacement email was invented.
+- Remote: `origin` points to `https://github.com/brianblong/QuickCopy.git`; neither branch is pushed.
+- Draft PR: not created because the feature branch is not available on the remote.
 
 The following must remain outside commits: `.venv`, `.test-data`, `__pycache__`, `build`, `dist`, generated snippets, and personal snippet data. The existing `.gitignore` excludes these paths and generated files.
 
@@ -69,4 +71,4 @@ Validation:
 
 ## Landing steps
 
-After the owner provides or creates the intended existing GitHub repository and configures a real Git author identity (including email), initialize the repository if needed, commit `.gitignore` on `main`, create `feat/quickcopy-desktop`, and commit the reviewed source, tests, icon/build setup, README, review/workflow records, and this handoff. Then push the feature branch with the existing authenticated account and open a **draft** PR with the title and description above. Do not merge.
+To finish, the owner must allow this commit email in GitHub email privacy settings or authorize a GitHub-provided no-reply address, then push `main` and `feat/quickcopy-desktop` and open a **draft** PR with the title and description above. Do not merge.
