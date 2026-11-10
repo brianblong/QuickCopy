@@ -10,13 +10,12 @@ The final independent review is complete. The original clipboard-after-exit bug 
 - Suggested app commit message: `feat: add local QuickCopy desktop snippet app`
 - Suggested base commit message: `chore: initialize QuickCopy repository ignores`
 - Base: `main` initialized locally before the feature branch.
-- Git identity: repository-local `Brian Long <brianblong06@gmail.com>` as explicitly authorized.
+- Git identity: repository-local `Brian Long <161542780+brianblong@users.noreply.github.com>`, derived from verified GitHub account `brianblong` (ID `161542780`) with explicit user approval.
 - GitHub access: authenticated as `brianblong` via `gh`, with `repo` scope.
 - Private repository: `https://github.com/brianblong/QuickCopy` was created and verified private.
-- Local commits: `acd31af` (`chore: initialize QuickCopy repository ignores`), `77fe48c` (`feat: add local QuickCopy desktop snippet app`).
-- Push blocker: GitHub rejected `main` because the commit would publish the private Gmail address (`GH007`). No account email-privacy setting was changed and no replacement email was invented.
-- Remote: `origin` points to `https://github.com/brianblong/QuickCopy.git`; neither branch is pushed.
-- Draft PR: not created because the feature branch is not available on the remote.
+- Local commits: `37d7e22` (`chore: initialize QuickCopy repository ignores`), `f3ae47f` (`feat: add local QuickCopy desktop snippet app`), `0500937` (`docs: record GitHub handoff status`).
+- Remote: `origin` points to `https://github.com/brianblong/QuickCopy.git`; `main` and `feat/quickcopy-desktop` are pushed.
+- Draft PR: `https://github.com/brianblong/QuickCopy/pull/1`, title `Add QuickCopy Windows snippet app`, verified draft and targeting `main`.
 
 The following must remain outside commits: `.venv`, `.test-data`, `__pycache__`, `build`, `dist`, generated snippets, and personal snippet data. The existing `.gitignore` excludes these paths and generated files.
 
@@ -71,4 +70,4 @@ Validation:
 
 ## Landing steps
 
-To finish, the owner must allow this commit email in GitHub email privacy settings or authorize a GitHub-provided no-reply address, then push `main` and `feat/quickcopy-desktop` and open a **draft** PR with the title and description above. Do not merge.
+The owner should complete the manual taskbar pinning and visual/display checks. Do not merge this draft PR until those acceptance checks are complete.
