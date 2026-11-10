@@ -78,7 +78,7 @@ The original clipboard blocker is resolved and affected tests plus executable la
 - **Clipboard ownership:** `quickcopy.py:111-133` retains the previously reviewed native `CF_UNICODETEXT` ownership path. The nine-test run reconfirmed the separate-process clipboard regression.
 - **Layout and interaction:** `quickcopy.py:161-264` keeps the list as the expanding grid row and reserves the new-snippet label, field/Add row, and helper text. The focused scrollbar and buttons remain adjacent to previews; the test suite confirms scrolling, focus reveal, and input visibility.
 - **Assets/package:** `assets/copy-light.png`, `assets/quickcopy.png`, `assets/quickcopy.ico`, and `assets/quickcopy.svg` are present. `build.ps1:9` adds the complete `assets` directory to the one-file package, while the ICO remains the executable icon.
-- **Documentation/privacy:** `README.md` identifies Windows 10/11, local `%LOCALAPPDATA%` storage, fictional screenshot data, private preview access, build instructions, and the planned `v0.2.0-preview.1` links. The release URL and private-repository permissions were not independently verified through GitHub in this review.
+- **Documentation/privacy (historical redesign review):** At that stage, `README.md` identified Windows 10/11, local `%LOCALAPPDATA%` storage, fictional screenshot data, private preview access, build instructions, and planned `v0.2.0-preview.1` links. The current README and release are documented in the final floating-dock handoff.
 
 ### Unperformed manual checks
 
