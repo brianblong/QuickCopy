@@ -90,3 +90,65 @@ The original clipboard blocker is resolved and affected tests plus executable la
 ### Handoff status
 
 The redesign is clear of new functional findings based on the executed checks. Keep the repository private and the PR draft as requested; taskbar, multi-monitor/scaling, and release-link verification remain manual or GitHub-agent checks.
+
+## Build-script follow-up — 2026-11-09
+
+- `build.ps1:5-8` now creates `.venv` only when `.venv\Scripts\python.exe` is absent, avoiding the repeated-build failure caused by trying to replace an interpreter currently in use by tests or another build.
+- PowerShell parser check for the revised script: **passed**.
+- The script still installs requirements and invokes PyInstaller through the project-local interpreter; the lead's concurrent rebuild was not duplicated by this review.
+
+## Final floating-dock build review — 2026-11-09
+
+### Initial finding and correction
+
+#### Initially reported high: duplicate launch did not restore a minimized window
+
+- **Location:** `quickcopy.py:85-109`, especially `ShowWindow(window, 9)` at line 107; the promised behavior is also documented at `README.md:19`.
+- **Reproduction:**
+  1. Confirm no QuickCopy process is running.
+  2. Launch the final `dist\QuickCopy.exe` (`10,645,758` bytes, timestamp `2026-11-09 20:49:17`) with a temporary `LOCALAPPDATA`.
+  3. Minimize its window through Win32 `ShowWindow(hwnd, SW_MINIMIZE)`.
+  4. Launch the same executable again.
+  5. Wait six seconds and inspect the single remaining QuickCopy window with `IsIconic`.
+- **Expected:** The second launch restores and foregrounds the existing window.
+- **Initial actual:** The second process exited and only one QuickCopy process/window remained, but the window appeared iconic. An external `ShowWindow(hwnd, SW_RESTORE)` control restored it.
+- **Root cause:** The initial repro environment contained a reviewer-created orphan `python.exe` process (PID 37036) with a `TkTopLevel` window titled `QuickCopy`, while no process named QuickCopy was running. `claim_instance` uses `FindWindowW(None, "QuickCopy")`, so it could target that stale title window instead of the packaged app window. The process was from the failed keyboard interaction probe and was stopped by its specific PID.
+- **Clean retest:** `.test-data\reviewer-restore-repro.ps1` now aborts if either a QuickCopy process or any existing `QuickCopy`-title window is present, records every matching handle/class/title/PID, and cleans only processes it launches. With no stale title window, the final executable's duplicate launch left one visible QuickCopy window with `Iconic=False`; the repro output reports `duplicate launch restore PASSED`.
+- **Conclusion:** **No application finding remains.** The initial failure was test contamination, not a confirmed product regression.
+
+### Historical final-build checks (before marker fix)
+
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: **passed, 14 tests**.
+- `.venv\Scripts\python.exe -m py_compile quickcopy.py tests\test_quickcopy.py`: **passed**.
+- PowerShell parser check for `build.ps1`: **passed**.
+- Final executable timestamp/size matched the lead report.
+- Final executable isolated storage and bottom-right work-area placement: **passed** (`276x437` decorated frame, 12-pixel right/bottom margin).
+- Final executable duplicate launch process collapse and minimized-window restoration: **passed** in the clean repro.
+- Clean duplicate-launch evidence: `.test-data\reviewer-restore-repro.ps1` and `.test-data\reviewer-restore-repro-output.txt`; final result was **PASSED**, with one visible QuickCopy window and `final iconic=False`.
+
+### Remaining unperformed checks
+
+- Taskbar pinning and reopening from the pinned icon.
+- Physical multi-monitor arrangements, negative-coordinate placement, and display-scaling comfort.
+- Visual screenshot/icon review outside the supplied assets.
+- Packaged-executable UI copy followed by clipboard read after executable exit; the source-level 14-test clipboard regression passed.
+
+### Clearance
+
+The apparent minimized-restore failure is cleared as reviewer test contamination. The final executable passes the clean duplicate-launch restore check. Keep taskbar pinning, multi-monitor/scaling, visual, and packaged-executable clipboard UI checks listed as unperformed manual checks.
+
+## Marker-fix verification — 2026-11-09
+
+- The final rebuilt executable was `dist\QuickCopy.exe`, size `10,647,442` bytes, timestamp `2026-11-09 20:56:11`.
+- `quickcopy.py:85-123` now marks only the real application HWND with `SetPropW(APP_ID, 1)`, searches same-title windows with `FindWindowExW`, and restores only a window carrying that marker. `register_window` removes the marker on root destruction.
+- Independent same-title collision smoke test: **passed**. A separate unmarked Tk preview window titled `QuickCopy` remained open while the packaged executable launched, was minimized, and launched a second time. The marked application window restored (`Iconic=False`), while the unmarked preview was ignored.
+- The final smoke test observed exactly one marked visible application window plus the separate unmarked preview, then closed the application and preview; no QuickCopy processes remained afterward.
+- The updated source integration test accounts for PyInstaller/venv launcher child-PID differences by identifying the marked HWND rather than comparing it to `Popen.pid`. This targeted collision/restore check independently passed.
+
+## Final frozen clearance — 2026-11-09
+
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: **passed, 15/15 tests, 10.549 seconds, no skips**.
+- The suite includes the marked-window same-title preview collision regression, exact clipboard survival after process exit, edit/delete persistence and failure cases, keyboard menu/editor behavior, empty-list restart, scrolling, compact layout, and work-area placement.
+- Final frozen executable: `dist\QuickCopy.exe`, `10,647,442` bytes, SHA-256 `9C6AA2A234DD91CF244323949B878222D43364BE7BE29ABBB27A5F58E19D52F1`.
+- The independent packaged collision smoke test passed with an unmarked Tk preview open; the marked application window restored after minimize and duplicate launch, and cleanup left no QuickCopy processes.
+- **Final review status: cleared for the GitHub handoff**, subject to the already documented manual checks for taskbar pinning, physical multi-monitor/scaling behavior, visual comfort, and packaged-executable UI clipboard verification.
