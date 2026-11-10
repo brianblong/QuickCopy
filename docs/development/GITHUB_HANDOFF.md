@@ -12,9 +12,9 @@ The lead visually inspected the native app and captured the four fictional-data 
 - Branch: `feat/quickcopy-desktop`
 - Base: `main`
 - Repository-local identity: `Brian Long <161542780+brianblong@users.noreply.github.com>`
-- Final reviewed source commit: recorded below after the release commit is created.
+- Final reviewed source commit: `2ab018702e09a13d84455fa5ab3ca336042aad69` (`feat: add QuickCopy floating dock preview`)
 - Draft PR: `https://github.com/brianblong/QuickCopy/pull/1`
-- Private prerelease: `https://github.com/brianblong/QuickCopy/releases/tag/v0.3.0-preview.1`
+- Private prerelease: [`v0.3.0-preview.1`](https://github.com/brianblong/QuickCopy/releases/tag/v0.3.0-preview.1)
 - Final executable: 10,647,442 bytes, SHA-256 `9C6AA2A234DD91CF244323949B878222D43364BE7BE29ABBB27A5F58E19D52F1`
 
 The following remain outside Git: `.venv`, `.test-data`, `__pycache__`, `build`, `dist`, release checksums, personal snippets, and local session notes. The old JPEG screenshots were removed; only the final PNG screenshots are used by the README and PR.
@@ -30,7 +30,7 @@ The following remain outside Git: `.venv`, `.test-data`, `__pycache__`, `build`,
 
 ## Release and PR
 
-The release must remain private, prerelease, and tagged at the exact reviewed source commit. Upload `dist\QuickCopy.exe` and a matching `SHA256SUMS.txt`; do not commit either file. Keep PR #1 open as a draft and do not merge.
+The release is private, prerelease, and tagged at the exact reviewed source commit. Its assets are [`QuickCopy.exe`](https://github.com/brianblong/QuickCopy/releases/download/v0.3.0-preview.1/QuickCopy.exe) and `SHA256SUMS.txt`; the executable hash is `9C6AA2A234DD91CF244323949B878222D43364BE7BE29ABBB27A5F58E19D52F1`. Keep PR #1 open as a draft and do not merge.
 
 ## Manual acceptance
 
