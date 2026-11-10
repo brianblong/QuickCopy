@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.1-preview.1 — Packaged drag interaction
+
+- Fixed packaged Windows dragging when the OS supplies a press and release without intermediate motion events.
+- Added gray hover and selected-row states while keeping the compact UI.
+- Preserved click-versus-drag behavior so fast dragging does not open the editor.
+- Added native hover and selected-state screenshots and Windows file version metadata.
+
+## 0.4.0-preview.1 — Snippet ordering
+
+- Drag snippet text up or down to change its position. A thin line shows the destination, and the list scrolls near its edges.
+- Save the new order on release; cancel with Escape or a drop outside the list.
+- Keep exact text, duplicate rows, and unsaved edits intact when reordering. A failed save leaves the original order in place.
+- Add Alt+Up/Down on focused copy buttons as a keyboard alternative.
+
 ## 0.3.0-preview.1 — Floating dock
 
 - Chose the floating-dock layout: a narrow 260 × 398 window with circular copy buttons and a centered plus button.

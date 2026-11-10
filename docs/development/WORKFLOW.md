@@ -1,5 +1,19 @@
 # Plan and handoffs
 
+## Packaged drag release — 0.4.1-preview.1
+
+The owner reported that the earlier packaged build did not drag. The lead fixed the Windows press/release path when no intermediate `B1-Motion` event arrives, while retaining the six-pixel threshold, temporary insertion line, edge autoscroll, release-only atomic saving, and Escape/outside-drop cancellation. Hover and click selection use gray row states; fast click-then-drag does not open the editor. Copy buttons remain independent, double-click editing stays available, and Alt+Up/Down offers a keyboard alternative.
+
+Lead and reviewer independently completed 23 Windows tests with no skips. Python compilation and PowerShell parsing passed. Packaged review independently verified gray hover, click selection, real OS drag in both directions, outside-drop cancellation, exact clipboard copying, double-click editing and Escape, and order persistence after restart using isolated fictional data. The final candidate is cleared for release.
+
+The frozen executable is 10,651,578 bytes, SHA-256 `0BBE5398044FAE44DE96D9862F1C0CD5CFCDBE8C65BE79DB0BDCD44CE4203EE4`, with FileVersion/ProductVersion `0.4.1-preview.1`. Native PrintWindow screenshots use fictional data and contain no cursor or glow. The repository remains private, PR #2 remains a draft, and merging remains with the owner.
+
+Private prerelease [`v0.4.1-preview.1`](https://github.com/brianblong/QuickCopy/releases/tag/v0.4.1-preview.1) is published at final commit `317fe3cfd0ee83b5acab1038a81c9998f3985301`. Downloaded `QuickCopy.exe` independently matched the frozen size, SHA-256, and `0.4.1-preview.1` file/product version. Final CI run [42769369353](https://github.com/brianblong/QuickCopy/actions/runs/42769369353) passed all checks. The release assets are `QuickCopy.exe` and `SHA256SUMS.txt`; taskbar pinning and physical monitor/scaling comfort remain manual.
+
+## Historical drag ordering update — 0.4.0-preview.1
+
+The earlier drag-ordering review ran 20 Windows tests: 19 passed and one existing single-instance integration check was skipped because the owner's Downloads copy was running. Its v0.4.0 executable and CI details remain historical; the 0.4.1 release supersedes them.
+
 ## Lead plan
 
 1. Inspect the workspace and available Python/Git tools.
@@ -63,4 +77,4 @@ The reviewer found a stale source preview sharing the application's title during
 
 ## Final floating-dock GitHub handoff
 
-The final reviewed source commit is `2ab018702e09a13d84455fa5ab3ca336042aad69`. Draft PR [#1](https://github.com/brianblong/QuickCopy/pull/1) remains open against `main` and must not be merged. Private prerelease [`v0.3.0-preview.1`](https://github.com/brianblong/QuickCopy/releases/tag/v0.3.0-preview.1) is tagged at that exact commit with the final executable and checksum. The final executable is 10,647,442 bytes with SHA-256 `9C6AA2A234DD91CF244323949B878222D43364BE7BE29ABBB27A5F58E19D52F1`. The README and PR use only the four final fictional-data PNG screenshots; the superseded JPEGs were removed. Fifteen Windows tests passed with no skips, compilation and PowerShell parsing passed, and the packaged storage, placement, duplicate restore, and same-title collision checks passed. Taskbar pinning, alternate physical monitors/scaling, and packaged UI copy-after-close remain manual checks. The repository remains private.
+The final reviewed floating-dock source remains at `2ab018702e09a13d84455fa5ab3ca336042aad69`, with merged PR #1 and private v0.3 release history preserved. The current drag-ordering source commit is `24740258cfc5c2346485db8a3449d065e571b597`; draft PR [#2](https://github.com/brianblong/QuickCopy/pull/2) targets `main`, and private prerelease [`v0.4.0-preview.1`](https://github.com/brianblong/QuickCopy/releases/tag/v0.4.0-preview.1) is tagged at that exact commit with the final executable and checksum. The current executable is 10,650,235 bytes with SHA-256 `0F7051FE7EE3BC468B0117B8D3A498DF4CA877A454AFC8B482B6C8EF47ED3F84`. Local review ran 20 tests: 19 passed and one intentional live-single-instance check was skipped; fresh Windows CI run [42756379878](https://github.com/brianblong/QuickCopy/actions/runs/42756379878) ran all 20 with no skips and passed compilation, PowerShell parsing, and build. Packaged drag interaction, taskbar pinning, alternate physical monitors/scaling, and packaged UI copy-after-close remain manual checks. The repository remains private.

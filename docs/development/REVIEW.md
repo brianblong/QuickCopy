@@ -152,3 +152,129 @@ The apparent minimized-restore failure is cleared as reviewer test contamination
 - Final frozen executable: `dist\QuickCopy.exe`, `10,647,442` bytes, SHA-256 `9C6AA2A234DD91CF244323949B878222D43364BE7BE29ABBB27A5F58E19D52F1`.
 - The independent packaged collision smoke test passed with an unmarked Tk preview open; the marked application window restored after minimize and duplicate launch, and cleanup left no QuickCopy processes.
 - **Final review status: cleared for the GitHub handoff**, subject to the already documented manual checks for taskbar pinning, physical multi-monitor/scaling behavior, visual comfort, and packaged-executable UI clipboard verification.
+
+## Drag-to-reorder review — 2026-11-09
+
+### Result
+
+**No new functional findings.** The drag implementation preserves the requested simple interaction: labels initiate drag after a 6-pixel threshold, copy buttons remain copy-only, release is the only persistence point, and keyboard Alt+Up/Down provides a fallback.
+
+### Executed checks
+
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: **20 tests ran: 19 passed and 1 intentional skip** in 12.251 seconds.
+  - Passed coverage includes real press/motion/release reorder and restart persistence, click/cancel/outside-drop no-save behavior, held-edge autoscroll, duplicate reorder with pending edit and row actions, failed-save preservation, keyboard boundaries, edit/delete interactions, and clipboard/storage regressions.
+  - `test_second_launch_restores_own_window_with_same_title_preview` was skipped because a real QuickCopy instance was already running. It was not closed, focused, or killed.
+- `.venv\Scripts\python.exe -m py_compile quickcopy.py tests\test_quickcopy.py`: **passed**.
+- PowerShell parser check for `build.ps1`: **passed**.
+- Current rebuilt executable: `dist\QuickCopy.exe`, size `10,650,235` bytes, timestamp `2026-11-09 22:26:41`.
+
+### Static review
+
+- **Reorder math:** `quickcopy.py:380-417` computes the insertion position from row midpoints and adjusts for removal of the source row. Moving to the first, last, adjacent, and same position has the expected off-by-one behavior.
+- **Duplicate/edit identity:** `quickcopy.py:417-431` moves by original index order, not text value, then maps `edit_index` through that order. This preserves duplicate rows and an unsaved editor target across moves.
+- **Interaction boundaries:** `quickcopy.py:330-379` starts only from labels, ignores sub-threshold clicks, keeps double-click edit binding, shows the insertion line only during active drag, and cancels on Escape, outside release, render, menu, editor open, or root destruction.
+- **Persistence/failure behavior:** `move()` calls `persist()` only after an active in-bounds release. A failed atomic save returns before changing UI order or editor state; no-op and keyboard-boundary moves do not write.
+- **Autoscroll/callbacks:** `drag_tick()` uses an 80ms timer, scrolls within 24 pixels of the canvas edges, recomputes the target after scrolling, and cleanup cancels the outstanding timer.
+
+### Unperformed or blocked checks
+
+- Packaged-executable drag interaction was not run because an existing live QuickCopy instance was present; focusing or terminating it would violate the review constraints.
+- Taskbar pinning, physical multi-monitor/scaling behavior, and visual comfort remain manual checks.
+
+### Clearance
+
+The drag-to-reorder change is **cleared for the GitHub handoff** based on the 20-test suite, static review, and source-level interaction coverage. Keep the intentional single-instance skip and packaged smoke limitation explicit in the handoff.
+
+## Packaged real-drag acceptance gate — 2026-11-09
+
+### Status
+
+**Not cleared for the drag release yet.** The user-reported failure concerns real OS pointer input in the packaged application, which cannot be established by Tk `event_generate`, source tests, or static review alone. No packaged executable was launched in this phase.
+
+### Executed checks
+
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: **20 tests passed, 1 intentional skip** in 15.591 seconds. The skip was the existing single-instance test because a live QuickCopy instance was present; it was not touched.
+- Candidate executable was inspected but not launched: `dist\QuickCopy.exe`, timestamp `2026-11-09 22:26:41`, SHA-256 `0F7051FE7EE3BC468B0117B8D3A498DF4CA877A454AFC8B482B6C8EF47ED3F84`.
+- Python compilation and build-script parsing passed in the preceding drag review.
+
+### Isolated packaged fixture
+
+- Preparation script: `.test-data\prepare-packaged-drag-fixture.ps1`
+- Order verifier: `.test-data\verify-packaged-drag-order.ps1`
+- Fictional data: `.test-data\packaged-drag-fixture\QuickCopy\snippets.json`
+- Initial JSON order verified independently as:
+  `DRAG-A -> DRAG-B -> DRAG-C -> DRAG-D`
+- Intended launch environment:
+  `$env:LOCALAPPDATA = 'C:\Users\Brian\Projects\QuickCopy\.test-data\packaged-drag-fixture'`
+- The fixture contains no personal data. After real OS dragging, the verifier must confirm the JSON order, then the app must be restarted with the same isolated environment and the order checked again.
+
+### Required unperformed checks
+
+- Real mouse press/motion/release on the packaged executable, including the reported grey hover/selection behavior.
+- Actual reorder persistence before and after packaged-app restart.
+- Real click-vs-drag threshold, Escape/outside-drop cancellation, edge autoscroll, duplicate rows, and copy/edit/delete after a real drag.
+- Packaged executable hash comparison against the exact frozen candidate after the lead's OS-input session.
+
+**Do not publish or clear the GitHub handoff until the lead completes the real packaged interaction and the persisted JSON/restart order is independently verified.**
+
+## Frozen packaged fixture handoff — 2026-11-09
+
+- Candidate launched exactly: `dist\QuickCopy.exe`, FileVersion/ProductVersion `0.4.1-preview.1`, size `10,651,245` bytes, SHA-256 `51D65243E6FFD606006273C167E6AAE5F84620BFEF339A87FE883712B072FA0A`.
+- Isolated environment: `C:\Users\Brian\Projects\QuickCopy\.test-data\packaged-drag-fixture`.
+- Current running packaged app window was observed at HWND `330312`; no user data is involved.
+- Initial persisted order before OS input: `DRAG-A -> DRAG-B -> DRAG-C -> DRAG-D`.
+- Fixture writer now uses BOM-free UTF-8 because the application intentionally reads JSON as UTF-8. The writer and verifier scripts both parse successfully.
+- The packaged app is intentionally being held open for the lead's real OS hover/select/drag gestures. This reviewer has not simulated input and has not asserted reorder, hover, selection, cancellation, copy/edit/delete-after-drag, or restart behavior.
+
+## Real-input event instrumentation — 2026-11-09
+
+- Instrumented source runner: `.test-data\instrumented-source-runner.py`
+- Event log: `.test-data\real-drag-events.log`
+- The runner is currently open against the same BOM-free fictional A–D fixture. It monkeypatches only the source runner process and logs `begin_drag`, `drag_motion`, `end_drag`, `cancel_drag`, and `clear_selection` entry/exit, event type and root coordinates, drag state/target, grab ownership, bindtags, and final items.
+- Initial log confirms the label bindtags include `<Button-1>`, `<B1-Motion>`, `<ButtonRelease-1>`, `<Double-Button-1>`, `<Enter>`, and `<Leave>`, with no synthetic events generated by this review.
+- Real OS input and persisted-order assertions remain pending the lead's sky gesture; no drag acceptance is claimed.
+
+### Follow-up trace analysis
+
+The prior trace contains genuine Tk pointer events (`type=4` press, repeated `type=6` motion, and `type=5` release) reaching the row label. The drag state became active and the source runner ended with persisted in-memory order `DRAG-B, DRAG-D, DRAG-A, DRAG-C` before `DESTROY`; this is evidence that real pointer routing works in the source runner, but it does not establish packaged-executable behavior.
+
+The fixture has now been reset to `DRAG-A, DRAG-B, DRAG-C, DRAG-D`, and a fresh instrumented source runner is held open. Current runner PID is recorded in `.test-data\real-drag-events.log`; no synthetic input has been generated for this run.
+
+### Release-only input diagnosis
+
+The fresh trace independently confirms the reported routing failure: it contains a press at `(-191,645)` and release at `(-191,771)`, with no `type=6` motion event. `end_drag` therefore observed `active=False` and canceled without reordering. This explains the packaged sky result without indicating a packaged-only defect.
+
+The current source change in `end_drag` calls `drag_motion(event)` before reading the drag state when it is inactive. That reuses the six-pixel threshold, computes the release-position target, and still applies the existing canvas-bounds check before committing. The new focused regression `test_drag_release_without_motion_still_reorders` covers the missing-motion path; packaged validation remains pending the rebuilt executable.
+
+### Corrected packaged candidate
+
+Independent checks passed:
+
+- Full Windows suite: 23 tests passed, no skips, in 17.824 seconds.
+- `py_compile` passed for `quickcopy.py` and `tests\test_quickcopy.py`.
+- `build.ps1` PowerShell parsing passed.
+- Rebuilt `dist\QuickCopy.exe`: 10,651,578 bytes, SHA-256 `0BBE5398044FAE44DE96D9862F1C0CD5CFCDBE8C65BE79DB0BDCD44CE4203EE4`, FileVersion/ProductVersion `0.4.1-preview.1`.
+
+The exact rebuilt executable is running with isolated `.test-data\packaged-drag-fixture` storage, reset to `DRAG-A, DRAG-B, DRAG-C, DRAG-D`. The actual Tk window is hosted by child PID `45300` (launcher PID `39240`), HWND `0x28007A`, title `QuickCopy`. Packaged real pointer reorder and restart persistence are still pending lead-driven OS gestures; no packaged drag acceptance is claimed yet.
+
+Lead-driven packaged OS gesture 1 is independently confirmed in storage: after hover/select and dragging A below C, the fixture JSON is `DRAG-B, DRAG-C, DRAG-A, DRAG-D`. The executable remains unchanged at 10,651,578 bytes with SHA-256 `0BBE5398044FAE44DE96D9862F1C0CD5CFCDBE8C65BE79DB0BDCD44CE4203EE4`. This confirms one real packaged reorder; restart persistence and the second gesture remain pending.
+
+The second packaged drag is independently confirmed: fixture JSON is exactly `DRAG-D, DRAG-B, DRAG-C, DRAG-A`. The subsequent drag of D outside the canvas left that order unchanged. Clipboard verification also passed through Windows `Get-Clipboard -Raw`: exact text was `DRAG-B | bravo fictional snippet`.
+
+Delete behavior, long-list edge autoscroll, and drag cancellation are covered by source Tk tests (`test_delete_cancel_then_duplicate_row_and_empty_restart`, `test_drag_autoscroll_and_drop_in_long_list`, and `test_drag_click_cancel_and_outside_drop_do_not_save`). They are not claimed as independently performed packaged manual checks.
+
+## Final packaged drag review — cleared
+
+The final packaged acceptance sequence is complete with no open findings:
+
+- Real packaged hover produced the gray hover state; clicking A produced the stronger selected state.
+- Real packaged drag A below C persisted `DRAG-B, DRAG-C, DRAG-A, DRAG-D`.
+- Real packaged drag D to first persisted `DRAG-D, DRAG-B, DRAG-C, DRAG-A`.
+- Real packaged drag D outside the canvas canceled and preserved that order.
+- Real packaged copy of B produced the exact Windows clipboard text `DRAG-B | bravo fictional snippet`.
+- Real packaged double-click on B opened the editor with the exact text; Escape dismissed it without saving.
+- After closing and relaunching the same executable with the same isolated `LOCALAPPDATA` and without resetting data, JSON remained exactly `DRAG-D, DRAG-B, DRAG-C, DRAG-A`.
+- Restarted window was verified as `QuickCopy`, child PID `35196`, HWND `0x330A36`.
+- Final executable remained 10,651,578 bytes, SHA-256 `0BBE5398044FAE44DE96D9862F1C0CD5CFCDBE8C65BE79DB0BDCD44CE4203EE4`, version `0.4.1-preview.1`.
+
+The prior release-only drag failure is resolved by routing the release event through the six-pixel drag threshold when Windows supplies no motion events. All 23 automated tests passed with no skips. Delete, edge autoscroll, keyboard boundaries, duplicate/edit-target remapping, failure preservation, and related cases remain source-automated coverage rather than independently performed packaged gestures. No severity findings remain; this review clears the candidate for GitHub handoff.
