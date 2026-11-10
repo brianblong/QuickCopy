@@ -249,6 +249,8 @@ class QuickCopy:
         self.edit_index = None
         self.copy_job = None
         self.position_job = None
+        self.drag = None
+        self.drag_job = None
         root.bind("<Destroy>", self.cleanup, add="+")
         root.title("QuickCopy")
         root.geometry("260x398")
@@ -295,6 +297,8 @@ class QuickCopy:
         self.canvas.bind("<Next>", lambda event: self.canvas.yview_scroll(1, "pages"))
         self.canvas.bind("<Prior>", lambda event: self.canvas.yview_scroll(-1, "pages"))
         self.empty = tk.Label(self.canvas, text="Add your first snippet", background=BG, foreground=MUTED)
+        self.drop_line = tk.Frame(self.canvas, background="#a8b5c8", height=2)
+        root.bind("<Escape>", self.cancel_drag, add="+")
 
         self.editor = ttk.Frame(outer, padding=(0, 8, 0, 3))
         self.editor.columnconfigure(0, weight=1)
@@ -329,7 +333,7 @@ class QuickCopy:
 
     def cleanup(self, event):
         if event.widget == self.root:
-            for job in (self.copy_job, self.position_job):
+            for job in (self.copy_job, self.position_job, self.drag_job):
                 if job is not None:
                     self.root.after_cancel(job)
 
@@ -375,6 +379,7 @@ class QuickCopy:
             button.draw()
 
     def render_rows(self):
+        self.cancel_drag()
         self.reset_copy_feedback()
         for row in self.rows.winfo_children():
             row.destroy()
@@ -387,16 +392,111 @@ class QuickCopy:
             row.pack(fill="x")
             row.columnconfigure(0, weight=1)
             label = tk.Label(row, text=self.preview(text, max(60, self.canvas.winfo_width() - 48)),
-                             width=1, anchor="w", background=BG, foreground=TEXT, cursor="hand2")
+                             width=1, anchor="w", background=BG, foreground=TEXT, cursor="fleur")
             label.grid(row=0, column=0, sticky="ew")
             button = RoundButton(row, command=lambda i=index: self.copy(i), image=self.icon)
             button.grid(row=0, column=1, padx=(6, 0))
             button.bind("<FocusIn>", lambda event, r=row: self.reveal(r), add="+")
+            button.bind("<Alt-Up>", lambda event, i=index: self.move_key(i, -1))
+            button.bind("<Alt-Down>", lambda event, i=index: self.move_key(i, 1))
+            label.bind("<Button-1>", lambda event, i=index: self.begin_drag(i, event))
+            label.bind("<B1-Motion>", self.drag_motion)
+            label.bind("<ButtonRelease-1>", self.end_drag)
             label.bind("<Double-Button-1>", lambda event, i=index: self.open_editor(i))
             for widget in (row, label, button):
                 widget.bind("<Button-3>", lambda event, i=index: self.show_menu(i, event))
                 widget.bind("<Shift-F10>", lambda event, i=index: self.show_menu(i, event))
                 widget.bind("<Menu>", lambda event, i=index: self.show_menu(i, event))
+
+    def begin_drag(self, index, event):
+        self.cancel_drag()
+        self.drag = {"source": index, "target": index, "start": (event.x_root, event.y_root),
+                     "pointer": (event.x_root, event.y_root), "active": False}
+
+    def drag_motion(self, event):
+        if self.drag is None:
+            return
+        self.drag["pointer"] = (event.x_root, event.y_root)
+        if not self.drag["active"]:
+            x, y = self.drag["start"]
+            if max(abs(event.x_root - x), abs(event.y_root - y)) < 6:
+                return  # A click or double-click should not reorder anything.
+            self.drag["active"] = True
+            self.canvas.focus_set()
+            self.rows.winfo_children()[self.drag["source"]].winfo_children()[0].configure(foreground=MUTED)
+        if self.drag_job is None:
+            self.drag_tick()
+
+    def drag_tick(self, scroll=True):
+        self.drag_job = None
+        if self.drag is None or not self.drag["active"]:
+            return
+        _, pointer_y = self.drag["pointer"]
+        y = pointer_y - self.canvas.winfo_rooty()
+        height = self.canvas.winfo_height()
+        if scroll and y < 24:
+            self.canvas.yview_scroll(-1, "units")
+        elif scroll and y > height - 24:
+            self.canvas.yview_scroll(1, "units")
+        content_y = self.canvas.canvasy(y)
+        rows = self.rows.winfo_children()
+        before = next((i for i, row in enumerate(rows)
+                       if content_y < row.winfo_y() + row.winfo_height() / 2), len(rows))
+        self.drag["target"] = before - (before > self.drag["source"])
+        line_y = rows[before].winfo_y() if before < len(rows) else self.rows.winfo_height()
+        self.drop_line.place(x=2, y=max(1, min(height - 2, line_y - self.canvas.canvasy(0))),
+                             width=max(1, self.canvas.winfo_width() - 4), height=2)
+        self.drop_line.lift()
+        self.drag_job = self.root.after(80, self.drag_tick)
+
+    def cancel_drag(self, event=None):
+        if self.drag_job is not None:
+            self.root.after_cancel(self.drag_job)
+            self.drag_job = None
+        if self.drag is not None:
+            rows = self.rows.winfo_children()
+            if self.drag["source"] < len(rows):
+                rows[self.drag["source"]].winfo_children()[0].configure(foreground=TEXT)
+        self.drag = None
+        self.drop_line.place_forget()
+
+    def end_drag(self, event):
+        if self.drag is None:
+            return
+        drag = self.drag
+        # Use the release location even if Windows coalesced the last motion event.
+        if drag["active"]:
+            drag["pointer"] = (event.x_root, event.y_root)
+            if self.drag_job is not None:
+                self.root.after_cancel(self.drag_job)
+            self.drag_tick(scroll=False)
+        x = event.x_root - self.canvas.winfo_rootx()
+        y = event.y_root - self.canvas.winfo_rooty()
+        inside = 0 <= x < self.canvas.winfo_width() and 0 <= y < self.canvas.winfo_height()
+        self.cancel_drag()
+        if drag["active"] and inside:
+            self.move(drag["source"], drag["target"])
+
+    def move(self, source, target):
+        if source == target or not (0 <= source < len(self.items) and 0 <= target < len(self.items)):
+            return False
+        order = list(range(len(self.items)))
+        order.insert(target, order.pop(source))
+        items = [self.items[index] for index in order]
+        view = self.canvas.yview()[0]
+        if not self.persist(items):
+            return False
+        if self.edit_index is not None:
+            self.edit_index = order.index(self.edit_index)
+        self.root.update_idletasks()
+        self.canvas.yview_moveto(view)
+        self.reveal(self.rows.winfo_children()[target])
+        return True
+
+    def move_key(self, index, direction):
+        if self.move(index, index + direction):
+            self.rows.winfo_children()[index + direction].winfo_children()[1].focus_set()
+        return "break"
 
     def reveal(self, row):
         self.root.update_idletasks()
@@ -405,6 +505,7 @@ class QuickCopy:
             self.canvas.yview_moveto(row.winfo_y() / max(1, self.rows.winfo_height()))
 
     def show_menu(self, index, event):
+        self.cancel_drag()
         self.menu.delete(0, "end")
         self.menu.add_command(label="Edit", command=lambda: self.open_editor(index))
         self.menu.add_command(label="Delete", command=lambda: self.delete(index))
@@ -447,6 +548,7 @@ class QuickCopy:
         return "break"
 
     def open_editor(self, index=None):
+        self.cancel_drag()
         self.edit_index = index
         self.entry.delete("1.0", "end")
         self.entry.edit_reset()

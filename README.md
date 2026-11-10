@@ -38,6 +38,7 @@ The dock shows your saved snippets as compact rows. Click a row's copy button to
 - Double-click a snippet to edit it. You can also right-click it and choose **Edit**.
 - Right-click a snippet and choose **Delete**, or tab to a copy button and press **Shift+F10** or the Menu key to open the row menu. Deletion asks for confirmation.
 - Use the mouse wheel or scrollbar when the list is longer than the dock.
+- Drag a snippet's text up or down to reorder it. The line marks its new position; the order saves when you release. Hold near an edge to scroll, or press **Escape** to cancel. You can also tab to a copy button and press **Alt+Up/Down**.
 - Launching QuickCopy again focuses and restores the existing window instead of opening a second one.
 
 The first run uses a few fictional examples. The screenshots in this repository were captured from the app with fictional data; no personal snippets are included.
@@ -79,7 +80,7 @@ Run the Windows tests:
 py -m unittest discover -s tests -v
 ```
 
-The 15-test suite uses temporary storage and fictional text. It covers copy and clipboard survival, add/edit/delete persistence, duplicate rows, empty lists, keyboard interaction, scrolling, errors, startup placement, and same-title single-instance collisions.
+The 20-test suite uses temporary storage and fictional text. It covers copy and clipboard survival, add/edit/delete and order persistence, drag cancellation and scrolling, duplicate rows, empty lists, keyboard interaction, errors, startup placement, and same-title single-instance collisions.
 
 ## Repository
 

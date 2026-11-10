@@ -152,3 +152,35 @@ The apparent minimized-restore failure is cleared as reviewer test contamination
 - Final frozen executable: `dist\QuickCopy.exe`, `10,647,442` bytes, SHA-256 `9C6AA2A234DD91CF244323949B878222D43364BE7BE29ABBB27A5F58E19D52F1`.
 - The independent packaged collision smoke test passed with an unmarked Tk preview open; the marked application window restored after minimize and duplicate launch, and cleanup left no QuickCopy processes.
 - **Final review status: cleared for the GitHub handoff**, subject to the already documented manual checks for taskbar pinning, physical multi-monitor/scaling behavior, visual comfort, and packaged-executable UI clipboard verification.
+
+## Drag-to-reorder review — 2026-11-09
+
+### Result
+
+**No new functional findings.** The drag implementation preserves the requested simple interaction: labels initiate drag after a 6-pixel threshold, copy buttons remain copy-only, release is the only persistence point, and keyboard Alt+Up/Down provides a fallback.
+
+### Executed checks
+
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: **20 tests passed, 1 intentional skip** in 12.251 seconds.
+  - Passed coverage includes real press/motion/release reorder and restart persistence, click/cancel/outside-drop no-save behavior, held-edge autoscroll, duplicate reorder with pending edit and row actions, failed-save preservation, keyboard boundaries, edit/delete interactions, and clipboard/storage regressions.
+  - `test_second_launch_restores_own_window_with_same_title_preview` was skipped because a real QuickCopy instance was already running. It was not closed, focused, or killed.
+- `.venv\Scripts\python.exe -m py_compile quickcopy.py tests\test_quickcopy.py`: **passed**.
+- PowerShell parser check for `build.ps1`: **passed**.
+- Current rebuilt executable: `dist\QuickCopy.exe`, size `10,650,235` bytes, timestamp `2026-11-09 22:26:41`.
+
+### Static review
+
+- **Reorder math:** `quickcopy.py:380-417` computes the insertion position from row midpoints and adjusts for removal of the source row. Moving to the first, last, adjacent, and same position has the expected off-by-one behavior.
+- **Duplicate/edit identity:** `quickcopy.py:417-431` moves by original index order, not text value, then maps `edit_index` through that order. This preserves duplicate rows and an unsaved editor target across moves.
+- **Interaction boundaries:** `quickcopy.py:330-379` starts only from labels, ignores sub-threshold clicks, keeps double-click edit binding, shows the insertion line only during active drag, and cancels on Escape, outside release, render, menu, editor open, or root destruction.
+- **Persistence/failure behavior:** `move()` calls `persist()` only after an active in-bounds release. A failed atomic save returns before changing UI order or editor state; no-op and keyboard-boundary moves do not write.
+- **Autoscroll/callbacks:** `drag_tick()` uses an 80ms timer, scrolls within 24 pixels of the canvas edges, recomputes the target after scrolling, and cleanup cancels the outstanding timer.
+
+### Unperformed or blocked checks
+
+- Packaged-executable drag interaction was not run because an existing live QuickCopy instance was present; focusing or terminating it would violate the review constraints.
+- Taskbar pinning, physical multi-monitor/scaling behavior, and visual comfort remain manual checks.
+
+### Clearance
+
+The drag-to-reorder change is **cleared for the GitHub handoff** based on the 20-test suite, static review, and source-level interaction coverage. Keep the intentional single-instance skip and packaged smoke limitation explicit in the handoff.

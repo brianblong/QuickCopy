@@ -1,5 +1,13 @@
 # Plan and handoffs
 
+## Drag ordering update
+
+The owner requested simple drag-to-reorder and the same reviewer/GitHub handoffs. The lead added dragging on snippet text with a six-pixel movement threshold, a temporary insertion line, edge autoscroll, release-only atomic saving, and Escape/outside-drop cancellation. Copy buttons remain independent, double-click editing stays available, and Alt+Up/Down offers a keyboard alternative. Reordering tracks occurrences by index, retaining duplicate text and any open unsaved edit target.
+
+The lead and existing reviewer t1b each ran 20 Windows tests: 19 passed and one existing single-instance integration check was skipped because the owner's Downloads copy was running. No live application or personal snippets were changed by testing. Compilation, build-script parsing, and the standalone build passed. Reviewer static checks found no reorder, indexing, persistence, cancellation, autoscroll, or callback defects; packaged interactive testing remains manual while the existing app is running. The reviewer cleared the GitHub handoff.
+
+The reviewed executable is 10,650,235 bytes, SHA-256 `0F7051FE7EE3BC468B0117B8D3A498DF4CA877A454AFC8B482B6C8EF47ED3F84`. A genuine cursor-free screenshot records the insertion line. Existing GitHub agent t1h will update the private branch, draft PR, usage docs and v0.4.0-preview.1 prerelease, and verify the full Windows CI run. Merging remains with the owner.
+
 ## Lead plan
 
 1. Inspect the workspace and available Python/Git tools.

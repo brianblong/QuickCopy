@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 import tempfile
 import tkinter as tk
+from types import SimpleNamespace
 
 from PIL import Image
 
@@ -116,8 +117,17 @@ def main():
         app.copy(1)
         settle()
         capture(root, output / "copied.png")
+        app.reset_copy_feedback()
+        first = app.rows.winfo_children()[0].winfo_children()[0]
+        third = app.rows.winfo_children()[2]
+        x = first.winfo_rootx() + 10
+        app.begin_drag(0, SimpleNamespace(x_root=x, y_root=first.winfo_rooty() + 5))
+        app.drag_motion(SimpleNamespace(x_root=x, y_root=third.winfo_rooty() + third.winfo_height() - 3))
+        settle()
+        capture(root, output / "reorder-snippets.png")
+        app.cancel_drag()
         root.destroy()
-    print("Captured four real Windows views with fictional snippets and no cursor.")
+    print("Captured five real Windows views with fictional snippets and no cursor.")
 
 
 if __name__ == "__main__":

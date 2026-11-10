@@ -154,6 +154,102 @@ class QuickCopyTests(unittest.TestCase):
         self.assertEqual(self.app.editor_key(SimpleNamespace(keysym="Escape")), "break")
         self.assertEqual(load_snippets(self.path), EXAMPLES)
 
+    def test_drag_reorders_exact_text_and_survives_restart(self):
+        label = self.app.rows.winfo_children()[0].winfo_children()[0]
+        last = self.app.rows.winfo_children()[-1]
+        x = self.app.canvas.winfo_rootx() + 20
+        start_y = label.winfo_rooty() + 5
+        end_y = last.winfo_rooty() + last.winfo_height() - 5
+        label.event_generate("<ButtonPress-1>", x=5, y=5, rootx=x, rooty=start_y)
+        label.event_generate("<B1-Motion>", x=5, y=end_y - start_y + 5, rootx=x, rooty=end_y)
+        label.event_generate("<ButtonRelease-1>", x=5, y=end_y - start_y + 5, rootx=x, rooty=end_y)
+        self.root.update()
+        expected = EXAMPLES[1:] + EXAMPLES[:1]
+        self.assertEqual(self.app.items, expected)
+        self.assertEqual(load_snippets(self.path), expected)
+        self.app.rows.winfo_children()[0].winfo_children()[1].invoke()
+        self.assertEqual(self.clipboard_text(), EXAMPLES[1])
+        self.root.destroy()
+        self.root = tk.Tk()
+        self.app = QuickCopy(self.root, self.path)
+        self.assertEqual(self.app.items, expected)
+
+    def test_drag_click_cancel_and_outside_drop_do_not_save(self):
+        x = self.app.canvas.winfo_rootx() + 20
+        y = self.app.canvas.winfo_rooty() + 20
+        with patch("quickcopy.save_snippets") as save:
+            self.app.begin_drag(0, SimpleNamespace(x_root=x, y_root=y))
+            self.app.drag_motion(SimpleNamespace(x_root=x + 2, y_root=y + 2))
+            self.app.end_drag(SimpleNamespace(x_root=x + 2, y_root=y + 2))
+            self.app.begin_drag(0, SimpleNamespace(x_root=x, y_root=y))
+            self.app.drag_motion(SimpleNamespace(x_root=x, y_root=y + 80))
+            self.app.cancel_drag()
+            self.app.begin_drag(0, SimpleNamespace(x_root=x, y_root=y))
+            self.app.drag_motion(SimpleNamespace(x_root=x, y_root=y + 80))
+            self.app.end_drag(SimpleNamespace(x_root=x - 100, y_root=y + 80))
+        save.assert_not_called()
+        self.assertEqual(self.app.items, EXAMPLES)
+        self.assertEqual(load_snippets(self.path), EXAMPLES)
+        self.assertIsNone(self.app.drag)
+        self.assertIsNone(self.app.drag_job)
+        self.assertEqual(self.app.drop_line.winfo_manager(), "")
+
+    def test_drag_autoscroll_and_drop_in_long_list(self):
+        items = [f"Snippet {i}" for i in range(30)]
+        self.assertTrue(self.app.persist(items))
+        self.root.update()
+        self.app.canvas.yview_moveto(0)
+        x = self.app.canvas.winfo_rootx() + 20
+        top = self.app.canvas.winfo_rooty()
+        bottom = top + self.app.canvas.winfo_height() - 3
+        self.app.begin_drag(0, SimpleNamespace(x_root=x, y_root=top + 20))
+        self.app.drag_motion(SimpleNamespace(x_root=x, y_root=bottom))
+        self.root.after(350, self.root.quit)
+        self.root.mainloop()
+        self.assertGreater(self.app.canvas.yview()[0], 0)
+        self.assertEqual(self.app.items, items)  # Only commit when the pointer is released.
+        target = self.app.drag["target"]
+        self.app.end_drag(SimpleNamespace(x_root=x, y_root=bottom))
+        self.assertGreater(target, 5)
+        self.assertEqual(self.app.items.index("Snippet 0"), target)
+        self.assertEqual(load_snippets(self.path), self.app.items)
+        self.assertIsNone(self.app.drag_job)
+
+    def test_reorder_duplicates_keeps_pending_edit_and_row_actions(self):
+        self.assertTrue(self.app.persist(["same", "same", "keep"]))
+        self.app.open_editor(1)
+        self.app.entry.insert("end", " changed")
+        self.assertTrue(self.app.move(1, 2))
+        self.assertEqual(self.app.edit_index, 2)
+        self.assertTrue(self.app.move(2, 0))
+        self.assertEqual(self.app.edit_index, 0)
+        self.assertEqual(self.app.entry.get("1.0", "end-1c"), "same changed")
+        self.app.add()
+        self.app.rows.winfo_children()[0].winfo_children()[1].invoke()
+        self.assertEqual(self.clipboard_text(), "same changed")
+        with patch("quickcopy.messagebox.askyesno", return_value=True):
+            self.app.delete(1)
+        self.assertEqual(load_snippets(self.path), ["same changed", "keep"])
+
+    def test_reorder_failure_and_keyboard_boundaries(self):
+        self.app.open_editor(2)
+        self.app.entry.insert("end", " draft")
+        with patch("quickcopy.save_snippets", side_effect=OSError("Disk full")), patch("quickcopy.messagebox.showerror"):
+            self.assertFalse(self.app.move(0, 2))
+        self.assertEqual(self.app.items, EXAMPLES)
+        self.assertEqual(load_snippets(self.path), EXAMPLES)
+        self.assertEqual(self.app.edit_index, 2)
+        self.assertEqual(self.app.entry.get("1.0", "end-1c"), EXAMPLES[2] + " draft")
+        with patch("quickcopy.save_snippets") as save:
+            self.assertEqual(self.app.move_key(0, -1), "break")
+            self.assertEqual(self.app.move_key(2, 1), "break")
+            self.assertFalse(self.app.move(1, 1))
+        save.assert_not_called()
+        self.assertEqual(self.app.move_key(2, -1), "break")
+        self.assertEqual(self.app.edit_index, 1)
+        self.app.add()
+        self.assertEqual(load_snippets(self.path), [EXAMPLES[0], EXAMPLES[2] + " draft", EXAMPLES[1]])
+
     @unittest.skipUnless(sys.platform == "win32", "Windows monitor work area")
     def test_startup_window_clears_taskbar(self):
         import ctypes
