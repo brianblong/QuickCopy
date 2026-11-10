@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1-preview.1 — Packaged drag interaction
+
+- Fixed packaged Windows dragging when the OS supplies a press and release without intermediate motion events.
+- Added gray hover and selected-row states while keeping the compact UI.
+- Preserved click-versus-drag behavior so fast dragging does not open the editor.
+- Added native hover and selected-state screenshots and Windows file version metadata.
+
 ## 0.4.0-preview.1 — Snippet ordering
 
 - Drag snippet text up or down to change its position. A thin line shows the destination, and the list scrolls near its edges.

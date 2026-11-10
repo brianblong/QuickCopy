@@ -105,6 +105,16 @@ def main():
         position_window(root)
         settle()
         capture(root, output / "floating-dock.png")
+        app.hover_row(0)
+        settle()
+        capture(root, output / "hover-snippet.png")
+        first = app.rows.winfo_children()[0].winfo_children()[0]
+        point = SimpleNamespace(x_root=first.winfo_rootx() + 10, y_root=first.winfo_rooty() + 10)
+        app.begin_drag(0, point)
+        app.end_drag(point)
+        app.hover_row(None)
+        settle()
+        capture(root, output / "selected-snippet.png")
         app.open_editor()
         app.entry.insert("1.0", "https://www.linkedin.com/in/example")
         settle()
@@ -127,7 +137,7 @@ def main():
         capture(root, output / "reorder-snippets.png")
         app.cancel_drag()
         root.destroy()
-    print("Captured five real Windows views with fictional snippets and no cursor.")
+    print("Captured seven real Windows views with fictional snippets and no cursor.")
 
 
 if __name__ == "__main__":

@@ -174,6 +174,64 @@ class QuickCopyTests(unittest.TestCase):
         self.app = QuickCopy(self.root, self.path)
         self.assertEqual(self.app.items, expected)
 
+    def test_hover_click_selection_and_mouse_capture(self):
+        label = self.app.rows.winfo_children()[0].winfo_children()[0]
+        x, y = label.winfo_rootx() + 5, label.winfo_rooty() + 5
+        with patch("quickcopy.save_snippets") as save:
+            label.event_generate("<Enter>")
+            self.assertEqual(label.cget("background"), "#30363e")
+            label.event_generate("<Leave>")
+            self.assertEqual(label.cget("background"), "#1b1e22")
+            label.event_generate("<ButtonPress-1>", x=5, y=5, rootx=x, rooty=y)
+            self.assertEqual(self.app.selected_index, 0)
+            self.assertEqual(self.root.grab_current(), label)
+            self.assertEqual(label.cget("background"), "#3b4552")
+            label.event_generate("<ButtonRelease-1>", x=5, y=5, rootx=x, rooty=y)
+            self.assertIsNone(self.root.grab_current())
+            self.app.hover_row(None)
+            self.assertEqual(label.cget("background"), "#3b4552")
+            self.app.clear_selection()
+            self.assertEqual(label.cget("background"), "#1b1e22")
+        save.assert_not_called()
+
+    def test_fast_click_then_drag_does_not_open_editor(self):
+        label = self.app.rows.winfo_children()[0].winfo_children()[0]
+        x, y = label.winfo_rootx() + 5, label.winfo_rooty() + 5
+        for event in ("<ButtonPress-1>", "<ButtonRelease-1>", "<ButtonPress-1>"):
+            label.event_generate(event, x=5, y=5, rootx=x, rooty=y)
+        self.assertTrue(self.app.drag["edit_on_click"])
+        self.assertFalse(self.app.editor.winfo_ismapped())
+        last = self.app.rows.winfo_children()[-1]
+        target_y = last.winfo_rooty() + last.winfo_height() - 5
+        label.event_generate("<B1-Motion>", x=5, y=target_y - y + 5, rootx=x, rooty=target_y)
+        label.event_generate("<ButtonRelease-1>", x=5, y=target_y - y + 5, rootx=x, rooty=target_y)
+        self.assertEqual(self.app.items, EXAMPLES[1:] + EXAMPLES[:1])
+        self.assertEqual(self.app.selected_index, 2)
+        self.assertFalse(self.app.editor.winfo_ismapped())
+        # A genuine double-click without motion still opens editing on release.
+        label = self.app.rows.winfo_children()[0].winfo_children()[0]
+        x, y = label.winfo_rootx() + 5, label.winfo_rooty() + 5
+        for event in ("<ButtonPress-1>", "<ButtonRelease-1>", "<ButtonPress-1>", "<ButtonRelease-1>"):
+            label.event_generate(event, x=5, y=5, rootx=x, rooty=y)
+        self.root.update()
+        self.assertEqual(self.app.edit_index, 0)
+        self.assertTrue(self.app.editor.winfo_ismapped())
+
+    def test_drag_release_without_motion_still_reorders(self):
+        label = self.app.rows.winfo_children()[0].winfo_children()[0]
+        x, y = label.winfo_rootx() + 5, label.winfo_rooty() + 5
+        last = self.app.rows.winfo_children()[-1]
+        target_y = last.winfo_rooty() + last.winfo_height() - 5
+        label.event_generate("<ButtonPress-1>", x=5, y=5, rootx=x, rooty=y)
+        # No B1-Motion: Windows can deliver just the press and distant release.
+        label.event_generate("<ButtonRelease-1>", x=5, y=target_y - y + 5,
+                             rootx=x, rooty=target_y)
+        self.assertEqual(self.app.items, EXAMPLES[1:] + EXAMPLES[:1])
+        self.assertEqual(load_snippets(self.path), self.app.items)
+        self.assertEqual(self.app.selected_index, len(EXAMPLES) - 1)
+        self.assertIsNone(self.root.grab_current())
+        self.assertIsNone(self.app.drag_job)
+
     def test_drag_click_cancel_and_outside_drop_do_not_save(self):
         x = self.app.canvas.winfo_rootx() + 20
         y = self.app.canvas.winfo_rooty() + 20

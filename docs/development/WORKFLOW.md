@@ -1,12 +1,16 @@
 # Plan and handoffs
 
-## Drag ordering update
+## Packaged drag release — 0.4.1-preview.1
 
-The owner requested simple drag-to-reorder and the same reviewer/GitHub handoffs. The lead added dragging on snippet text with a six-pixel movement threshold, a temporary insertion line, edge autoscroll, release-only atomic saving, and Escape/outside-drop cancellation. Copy buttons remain independent, double-click editing stays available, and Alt+Up/Down offers a keyboard alternative. Reordering tracks occurrences by index, retaining duplicate text and any open unsaved edit target.
+The owner reported that the earlier packaged build did not drag. The lead fixed the Windows press/release path when no intermediate `B1-Motion` event arrives, while retaining the six-pixel threshold, temporary insertion line, edge autoscroll, release-only atomic saving, and Escape/outside-drop cancellation. Hover and click selection use gray row states; fast click-then-drag does not open the editor. Copy buttons remain independent, double-click editing stays available, and Alt+Up/Down offers a keyboard alternative.
 
-The lead and existing reviewer t1b each ran 20 Windows tests: 19 passed and one existing single-instance integration check was skipped because the owner's Downloads copy was running. No live application or personal snippets were changed by testing. Compilation, build-script parsing, and the standalone build passed. Reviewer static checks found no reorder, indexing, persistence, cancellation, autoscroll, or callback defects; packaged interactive testing remains manual while the existing app is running. The reviewer cleared the GitHub handoff.
+Lead and reviewer independently completed 23 Windows tests with no skips. Python compilation and PowerShell parsing passed. Packaged review independently verified gray hover, click selection, real OS drag in both directions, outside-drop cancellation, exact clipboard copying, double-click editing and Escape, and order persistence after restart using isolated fictional data. The final candidate is cleared for release.
 
-The reviewed executable is 10,650,235 bytes, SHA-256 `0F7051FE7EE3BC468B0117B8D3A498DF4CA877A454AFC8B482B6C8EF47ED3F84`. A genuine cursor-free screenshot records the insertion line. The private branch, draft PR #2, usage docs, and v0.4.0-preview.1 prerelease are published at the final reviewed commit below. Merging remains with the owner.
+The frozen executable is 10,651,578 bytes, SHA-256 `0BBE5398044FAE44DE96D9862F1C0CD5CFCDBE8C65BE79DB0BDCD44CE4203EE4`, with FileVersion/ProductVersion `0.4.1-preview.1`. Native PrintWindow screenshots use fictional data and contain no cursor or glow. The repository remains private, PR #2 remains a draft, and merging remains with the owner.
+
+## Historical drag ordering update — 0.4.0-preview.1
+
+The earlier drag-ordering review ran 20 Windows tests: 19 passed and one existing single-instance integration check was skipped because the owner's Downloads copy was running. Its v0.4.0 executable and CI details remain historical; the 0.4.1 release supersedes them.
 
 ## Lead plan
 

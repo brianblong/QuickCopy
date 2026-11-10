@@ -3,7 +3,7 @@
   <h1>QuickCopy</h1>
   <p>A small Windows dock for the text you reuse.</p>
   <p><strong>Windows 10 / 11</strong> · <strong>Local storage</strong> · <strong>Private preview</strong></p>
-  <p><a href="https://github.com/brianblong/QuickCopy/releases/tag/v0.4.0-preview.1">Download the v0.4 preview</a> · <a href="#use-it">Use it</a> · <a href="#build-from-source">Build from source</a></p>
+  <p><a href="https://github.com/brianblong/QuickCopy/releases/tag/v0.4.1-preview.1">Download the v0.4.1 preview</a> · <a href="#use-it">Use it</a> · <a href="#build-from-source">Build from source</a></p>
   <img src="docs/images/floating-dock.png" width="300" alt="QuickCopy floating dock with saved fictional snippets">
 </div>
 
@@ -11,11 +11,11 @@ QuickCopy keeps a short list of links, IDs, and other text close at hand. It ope
 
 ## Download
 
-**[Download QuickCopy.exe — Windows x64 preview](https://github.com/brianblong/QuickCopy/releases/download/v0.4.0-preview.1/QuickCopy.exe)**
+**[Download QuickCopy.exe — Windows x64 preview](https://github.com/brianblong/QuickCopy/releases/download/v0.4.1-preview.1/QuickCopy.exe)**
 
 The repository and preview are private. Sign in with an account that has access. The executable is unsigned and does not require Python.
 
-1. Download `QuickCopy.exe` from the [v0.4.0-preview.1 release](https://github.com/brianblong/QuickCopy/releases/tag/v0.4.0-preview.1).
+1. Download `QuickCopy.exe` from the [v0.4.1-preview.1 release](https://github.com/brianblong/QuickCopy/releases/tag/v0.4.1-preview.1).
 2. Put it in a permanent folder and open it.
 3. Right-click the running taskbar icon and choose **Pin to taskbar**.
 4. Close it and click the pinned icon to open it again.
@@ -40,7 +40,7 @@ The dock shows your saved snippets as compact rows. Click a row's copy button to
 - Double-click a snippet to edit it. You can also right-click it and choose **Edit**.
 - Right-click a snippet and choose **Delete**, or tab to a copy button and press **Shift+F10** or the Menu key to open the row menu. Deletion asks for confirmation.
 - Use the mouse wheel or scrollbar when the list is longer than the dock.
-- Drag a snippet's text up or down to reorder it. The line marks its new position; the order saves when you release. Hold near an edge to scroll, or press **Escape** to cancel. You can also tab to a copy button and press **Alt+Up/Down**.
+- Hover a snippet's text to highlight it, then click to select and hold while dragging the text up or down to reorder it. The line marks its new position; the order saves when you release. Hold near an edge to scroll, or press **Escape** to cancel. You can also tab to a copy button and press **Alt+Up/Down**.
 - Launching QuickCopy again focuses and restores the existing window instead of opening a second one.
 
 The first run uses a few fictional examples. The screenshots in this repository were captured from the app with fictional data; no personal snippets are included.
@@ -81,7 +81,7 @@ Run the Windows tests:
 py -m unittest discover -s tests -v
 ```
 
-The 20-test suite uses temporary storage and fictional text. Locally, 20 tests run with 19 passing and one intentional single-instance skip when a live user QuickCopy process is present; Windows CI runs all 20 without that local-process limitation. The suite covers copy and clipboard survival, add/edit/delete and order persistence, drag cancellation and scrolling, duplicate rows, empty lists, keyboard interaction, errors, startup placement, and same-title single-instance collisions.
+The 23-test suite uses temporary storage and fictional text. The final Windows run passed all 23 tests with no skips. It covers copy and clipboard survival, add/edit/delete and order persistence, real drag-release handling, hover/selection and mouse capture, drag cancellation and scrolling, duplicate rows, empty lists, keyboard interaction, errors, startup placement, and same-title single-instance collisions.
 
 ## Repository
 
