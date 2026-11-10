@@ -13,9 +13,11 @@ The final independent review is complete. The original clipboard-after-exit bug 
 - Git identity: repository-local `Brian Long <161542780+brianblong@users.noreply.github.com>`, derived from verified GitHub account `brianblong` (ID `161542780`) with explicit user approval.
 - GitHub access: authenticated as `brianblong` via `gh`, with `repo` scope.
 - Private repository: `https://github.com/brianblong/QuickCopy` was created and verified private.
-- Local commits: `37d7e22` (`chore: initialize QuickCopy repository ignores`), `f3ae47f` (`feat: add local QuickCopy desktop snippet app`), `0500937` (`docs: record GitHub handoff status`).
-- Remote: `origin` points to `https://github.com/brianblong/QuickCopy.git`; `main` and `feat/quickcopy-desktop` are pushed.
-- Draft PR: `https://github.com/brianblong/QuickCopy/pull/1`, title `Add QuickCopy Windows snippet app`, verified draft and targeting `main`.
+- Local commits: `37d7e22` (`chore: initialize QuickCopy repository ignores`), `f3ae47f` (`feat: add local QuickCopy desktop snippet app`), `0500937` (`docs: record GitHub handoff status`), and redesign `48195fc` (`feat: refine QuickCopy dark desktop preview`).
+- Remote: `origin` points to `https://github.com/brianblong/QuickCopy.git`; `main` and `feat/quickcopy-desktop` are pushed. The redesign commit is `48195fcecbd858232d0374978fdb585fd83df408`.
+- Draft PR: `https://github.com/brianblong/QuickCopy/pull/1`, title `Add QuickCopy Windows snippet app`, verified draft and targeting `main`; its body includes the dark UI screenshots, release links, validation, and manual checks.
+- Private prerelease: [`v0.2.0-preview.1`](https://github.com/brianblong/QuickCopy/releases/tag/v0.2.0-preview.1), tagged at the exact redesign commit. Assets are [`QuickCopy.exe`](https://github.com/brianblong/QuickCopy/releases/download/v0.2.0-preview.1/QuickCopy.exe) and `SHA256SUMS.txt`; the reviewed executable hash is `A6E55F4447845B3FD6F024F9C57403E2159AC28DCCF70AA964387DDAB461C7B2`.
+- CI: `.github/workflows/windows.yml` uses official `actions/checkout@v7.0.1` and `actions/setup-python@v7.1.0`, verified from GitHub release metadata.
 
 The following must remain outside commits: `.venv`, `.test-data`, `__pycache__`, `build`, `dist`, generated snippets, and personal snippet data. The existing `.gitignore` excludes these paths and generated files.
 
@@ -70,4 +72,4 @@ Validation:
 
 ## Landing steps
 
-The owner should complete the manual taskbar pinning and visual/display checks. Do not merge this draft PR until those acceptance checks are complete.
+The owner should complete the manual taskbar pinning, alternate monitor/scaling, visual comfort, and packaged UI copy-after-exit checks. Do not merge this draft PR or make the repository public.
