@@ -18,6 +18,7 @@ The final independent review is complete. The original clipboard-after-exit bug 
 - Draft PR: `https://github.com/brianblong/QuickCopy/pull/1`, title `Add QuickCopy Windows snippet app`, verified draft and targeting `main`; its body includes the dark UI screenshots, release links, validation, and manual checks.
 - Private prerelease: [`v0.2.0-preview.1`](https://github.com/brianblong/QuickCopy/releases/tag/v0.2.0-preview.1), tagged at the exact redesign commit. Assets are [`QuickCopy.exe`](https://github.com/brianblong/QuickCopy/releases/download/v0.2.0-preview.1/QuickCopy.exe) and `SHA256SUMS.txt`; the reviewed executable hash is `A6E55F4447845B3FD6F024F9C57403E2159AC28DCCF70AA964387DDAB461C7B2`.
 - CI: `.github/workflows/windows.yml` uses official `actions/checkout@v7.0.1` and `actions/setup-python@v7.1.0`, verified from GitHub release metadata.
+- CI result: [Windows checks run 42740118895](https://github.com/brianblong/QuickCopy/actions/runs/42740118895) passed tests, syntax compilation, PowerShell parsing, and the standalone build on `feat/quickcopy-desktop`.
 
 The following must remain outside commits: `.venv`, `.test-data`, `__pycache__`, `build`, `dist`, generated snippets, and personal snippet data. The existing `.gitignore` excludes these paths and generated files.
 
