@@ -28,9 +28,7 @@ Get-FileHash .\QuickCopy.exe -Algorithm SHA256
 
 ## Use it
 
-<img src="docs/images/floating-dock.png" width="300" alt="QuickCopy floating dock with fictional saved snippets">
-
-The dock shows your saved snippets as compact rows. Click a row's copy button to copy the complete original text, including line breaks, Unicode, and surrounding whitespace. The button briefly changes to `Copied.`.
+The dock shows your saved snippets as compact rows. Click a row's copy button to copy the complete original text, including line breaks, Unicode, and surrounding whitespace. The button briefly shows a checkmark, and a small `Copied.` label appears below it.
 
 | Add a snippet | Edit a snippet |
 | --- | --- |
@@ -38,7 +36,7 @@ The dock shows your saved snippets as compact rows. Click a row's copy button to
 
 - Click **+** to open the Add panel. **Ctrl+Enter** saves; **Escape** cancels.
 - Double-click a snippet to edit it. You can also right-click it and choose **Edit**.
-- Right-click a snippet and choose **Delete**, or open the menu with **Shift+F10** or the Menu key. Deletion asks for confirmation.
+- Right-click a snippet and choose **Delete**, or tab to a copy button and press **Shift+F10** or the Menu key to open the row menu. Deletion asks for confirmation.
 - Use the mouse wheel or scrollbar when the list is longer than the dock.
 - Launching QuickCopy again focuses and restores the existing window instead of opening a second one.
 
