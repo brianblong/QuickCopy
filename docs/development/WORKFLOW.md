@@ -8,6 +8,8 @@ Lead and reviewer independently completed 23 Windows tests with no skips. Python
 
 The frozen executable is 10,651,578 bytes, SHA-256 `0BBE5398044FAE44DE96D9862F1C0CD5CFCDBE8C65BE79DB0BDCD44CE4203EE4`, with FileVersion/ProductVersion `0.4.1-preview.1`. Native PrintWindow screenshots use fictional data and contain no cursor or glow. The repository remains private, PR #2 remains a draft, and merging remains with the owner.
 
+Private prerelease [`v0.4.1-preview.1`](https://github.com/brianblong/QuickCopy/releases/tag/v0.4.1-preview.1) is published at final commit `317fe3cfd0ee83b5acab1038a81c9998f3985301`. Downloaded `QuickCopy.exe` independently matched the frozen size, SHA-256, and `0.4.1-preview.1` file/product version. Final CI run [42769369353](https://github.com/brianblong/QuickCopy/actions/runs/42769369353) passed all checks. The release assets are `QuickCopy.exe` and `SHA256SUMS.txt`; taskbar pinning and physical monitor/scaling comfort remain manual.
+
 ## Historical drag ordering update — 0.4.0-preview.1
 
 The earlier drag-ordering review ran 20 Windows tests: 19 passed and one existing single-instance integration check was skipped because the owner's Downloads copy was running. Its v0.4.0 executable and CI details remain historical; the 0.4.1 release supersedes them.

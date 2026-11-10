@@ -33,6 +33,6 @@ Screenshots were regenerated through native PrintWindow capture with fictional d
 
 The earlier v0.4.0-preview.1 drag release used executable hash `0F7051FE7EE3BC468B0117B8D3A498DF4CA877A454AFC8B482B6C8EF47ED3F84` and 20-test local/CI reporting. It is superseded by this 0.4.1 candidate and should not be used for current download links.
 
-## Release plan
+## Published release
 
-Publish private prerelease `v0.4.1-preview.1` at the exact reviewed source commit with assets `QuickCopy.exe` and `SHA256SUMS.txt`. Do not merge PR #2 or change repository visibility.
+Private prerelease [`v0.4.1-preview.1`](https://github.com/brianblong/QuickCopy/releases/tag/v0.4.1-preview.1) is published at final commit `317fe3cfd0ee83b5acab1038a81c9998f3985301`. Its assets are [`QuickCopy.exe`](https://github.com/brianblong/QuickCopy/releases/download/v0.4.1-preview.1/QuickCopy.exe) and [`SHA256SUMS.txt`](https://github.com/brianblong/QuickCopy/releases/download/v0.4.1-preview.1/SHA256SUMS.txt). The downloaded executable independently matched 10,651,578 bytes, SHA-256 `0BBE5398044FAE44DE96D9862F1C0CD5CFCDBE8C65BE79DB0BDCD44CE4203EE4`, and FileVersion/ProductVersion `0.4.1-preview.1`. Windows CI run [42769369353](https://github.com/brianblong/QuickCopy/actions/runs/42769369353) passed all checks for this final documentation commit. Do not merge PR #2 or change repository visibility.
