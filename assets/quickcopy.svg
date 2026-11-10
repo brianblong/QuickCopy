@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <defs><mask id="front"><rect width="24" height="24" fill="white"/><rect x="3" y="9" width="12" height="12" rx="2" fill="black"/></mask></defs>
+  <rect x="9" y="3" width="12" height="12" rx="2" fill="none" stroke="#292d33" stroke-width="1.7" mask="url(#front)"/>
+  <rect x="3" y="9" width="12" height="12" rx="2" fill="none" stroke="#292d33" stroke-width="1.7"/>
+</svg>
