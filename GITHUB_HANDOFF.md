@@ -2,7 +2,7 @@
 
 ## Release status
 
-The final independent review is complete. The original clipboard-after-exit bug was fixed and re-tested. The app and rebuilt executable are reviewed for the recorded checks below; taskbar pinning and visual/display checks remain unperformed and must not be represented as passed.
+The final independent review is complete. The original clipboard-after-exit bug was fixed and re-tested. The dark redesign was visually checked in the source preview with fictional data and captured in three real screenshots; taskbar pinning, alternate display arrangements/scaling, and packaged UI copy-after-exit remain manual checks.
 
 ## Repository status
 
@@ -26,13 +26,13 @@ The following must remain outside commits: `.venv`, `.test-data`, `__pycache__`,
 
 Passed:
 
-- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: 8 tests passed.
+- `.venv\Scripts\python.exe -m unittest discover -s tests -v`: 9 tests passed, including startup placement.
 - `.venv\Scripts\python.exe -m py_compile quickcopy.py tests\test_quickcopy.py`: passed.
 - PowerShell parser check for `build.ps1`: passed.
 - Rebuilt `dist\QuickCopy.exe` launch with isolated `LOCALAPPDATA`: passed.
 - Executable local JSON creation: passed.
 - Single-instance enforcement and minimized-window restoration: passed.
-- Independent reviewer confirmed the native Windows clipboard ownership fix and all 8 tests.
+- Independent reviewer confirmed the native Windows clipboard ownership fix and all 9 tests, including startup placement.
 
 Not performed or not independently exercised:
 
@@ -69,7 +69,7 @@ Validation:
 
 - 8 project tests passed independently and for the lead, including storage, scrolling/layout, exact long-text copy, restart persistence, failed-save handling, and a separate-process clipboard-after-exit regression.
 - The rebuilt executable passed isolated local-data launch, JSON creation, single-instance enforcement, and minimized-window restoration checks.
-- Taskbar pinning/reopen and visual/display checks remain manual acceptance checks and were not performed.
+- Taskbar pinning/reopen, alternate monitor/scaling, and packaged UI copy-after-exit remain manual acceptance checks. The dark UI, icon treatment, and fictional-data screenshots were visually checked.
 
 ## Landing steps
 
